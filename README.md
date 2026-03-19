@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/demo.gif" width="90%">
+  <img src="demo.gif" width="90%">
   <br><br>
   <em>🎬 AI-Powered Speech Assessment — Full Workflow Demo</em>
 </p>

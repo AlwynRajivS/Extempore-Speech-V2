@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Extempore — Speech Assessment Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --coral:#d64f2a;--coral2:#e8673d;--coral-l:#fef0eb;--coral-m:rgba(214,79,42,.2);
+  --sky:#1a5fa8;--sky2:#2070c8;--sky-l:#edf3fc;--sky-m:rgba(26,95,168,.2);
+  --sage:#1a8c52;--sage-l:#eaf6f0;--sage-m:rgba(26,140,82,.22);
+  --amber:#c47010;--amber-l:#fef5e0;--amber-m:rgba(196,112,16,.22);
+  --violet:#7c3aed;--violet-l:#ede7f6;--violet-m:rgba(124,58,237,.2);
+  --ink:#0f0e0c;--ink2:#3a3530;--ink3:#6b6158;--muted:#a09890;
+  --bg:#faf6f1;--bg2:#f3ede5;--bg3:#ebe3d8;
+  --surf:#ffffff;--bdr:#e5ddd4;--bdr2:#d4c9bc;
+  --fn:'DM Sans',sans-serif;--fd:'Syne',sans-serif;--fm:'JetBrains Mono',monospace;
+  --sh2:0 8px 32px rgba(15,14,12,.1),0 2px 8px rgba(15,14,12,.06);
+  --sh3:0 24px 64px rgba(15,14,12,.14),0 8px 24px rgba(15,14,12,.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{min-height:100%;font-family:var(--fn);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── BG ── */
+.bg-wrap{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80vw 60vh at 110% -10%,rgba(214,79,42,.09) 0%,transparent 55%),radial-gradient(ellipse 70vw 60vh at -10% 110%,rgba(26,95,168,.08) 0%,transparent 55%),radial-gradient(ellipse 50vw 40vh at 50% 50%,rgba(255,255,255,.75) 0%,transparent 60%)}
+.bg-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(15,14,12,.05) 1px,transparent 1px);background-size:26px 26px}
+
+/* ── PORTAL ── */
+.portal{position:relative;z-index:1;min-height:100dvh;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── NAV ── */
+.nav{padding:clamp(12px,3vw,20px) clamp(16px,5vw,32px);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:clamp(36px,8vw,44px);height:clamp(36px,8vw,44px);border-radius:12px;background:linear-gradient(135deg,var(--coral),var(--coral2));display:grid;place-items:center;font-size:clamp(16px,4vw,20px);box-shadow:0 4px 14px rgba(214,79,42,.3);flex-shrink:0}
+.brand-name{font-family:var(--fd);font-size:clamp(.95rem,3.5vw,1.2rem);font-weight:800;letter-spacing:-.03em;color:var(--ink)}
+.brand-sub{font-size:clamp(.48rem,.9vw,.58rem);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:1px}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.live-pill{display:flex;align-items:center;gap:5px;background:var(--sage-l);border:1px solid var(--sage-m);border-radius:20px;padding:4px 10px;font-size:clamp(.58rem,.9vw,.66rem);font-weight:700;color:var(--sage);white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--sage);animation:pulse 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.clock{font-family:var(--fm);font-size:clamp(.62rem,1.2vw,.76rem);color:var(--ink3);background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:4px 10px;white-space:nowrap}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px,4vw,32px) clamp(16px,5vw,24px) clamp(32px,8vw,56px)}
+.eyebrow{font-size:clamp(.58rem,.9vw,.64rem);font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--coral);margin-bottom:clamp(8px,2vw,12px);display:flex;align-items:center;gap:8px}
+.eyebrow::before,.eyebrow::after{content:'';flex:1;max-width:32px;height:1px;background:rgba(214,79,42,.32)}
+.headline{font-family:var(--fd);font-size:clamp(1.6rem,6vw,3.2rem);font-weight:800;letter-spacing:-.04em;line-height:1.08;color:var(--ink);margin-bottom:clamp(8px,2vw,10px);text-align:center}
+.headline em{font-style:italic;color:var(--coral)}
+.sub{font-size:clamp(.8rem,1.8vw,.9rem);color:var(--ink3);max-width:min(420px,90vw);line-height:1.7;margin-bottom:clamp(24px,5vw,40px);font-weight:300;text-align:center}
+
+/* ── LOGIN CARD ── */
+.card{background:var(--surf);border:1.5px solid var(--bdr);border-radius:clamp(16px,4vw,24px);width:min(420px,100%);box-shadow:var(--sh2);animation:cardIn .45s cubic-bezier(.34,1.4,.64,1);overflow:hidden}
+@keyframes cardIn{from{opacity:0;transform:scale(.9) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.card-bar{height:4px;background:linear-gradient(90deg,var(--coral),var(--coral2),var(--violet))}
+.card-inner{padding:clamp(20px,5vw,32px)}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:clamp(12px,3vw,16px)}
+.field-label{font-size:clamp(.58rem,.9vw,.64rem);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.field-wrap{position:relative}
+.field-input{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:12px;padding:clamp(10px,2.5vw,13px) clamp(12px,3vw,16px);padding-right:44px;font-family:var(--fn);font-size:16px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s,background .2s;width:100%}
+.field-input:focus{border-color:var(--coral);box-shadow:0 0 0 3px rgba(214,79,42,.1);background:var(--surf)}
+.field-input::placeholder{color:var(--muted)}
+.field-icon{position:absolute;right:clamp(10px,2.5vw,14px);top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted);pointer-events:none}
+.pass-eye{position:absolute;right:clamp(10px,2.5vw,14px);top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:4px;-webkit-tap-highlight-color:transparent;transition:color .15s}
+.pass-eye:hover{color:var(--ink2)}
+.err-box{background:var(--coral-l);border:1.5px solid var(--coral-m);border-radius:11px;padding:clamp(8px,2vw,10px) clamp(12px,3vw,14px);font-size:clamp(.74rem,1.5vw,.8rem);color:var(--coral);font-weight:600;margin-bottom:14px;display:none;animation:fadeDown .2s ease}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.err-box.show{display:block}
+.submit-btn{width:100%;padding:clamp(12px,3vw,14px);border-radius:14px;border:none;font-family:var(--fd);font-size:clamp(.84rem,2vw,.94rem);font-weight:800;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;box-shadow:0 4px 16px rgba(214,79,42,.28);display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(214,79,42,.38)}
+.submit-btn:active{transform:translateY(0)}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.spin{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card-foot{padding:0 clamp(20px,5vw,32px) clamp(14px,3vw,20px);text-align:center;font-size:clamp(.64rem,1vw,.7rem);color:var(--muted);display:flex;align-items:center;gap:8px}
+.card-foot::before,.card-foot::after{content:'';flex:1;height:1px;background:var(--bdr)}
+
+/* ── FOOTER ── */
+.foot{padding:clamp(12px,3vw,16px) clamp(16px,5vw,32px);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;border-top:1px solid var(--bdr);font-size:clamp(.6rem,1vw,.68rem);color:var(--muted);text-align:center}
+.foot span{font-family:var(--fm)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:clamp(14px,4vw,24px);left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;width:calc(100% - 32px);max-width:360px}
+.toast{background:var(--ink);color:#fff;border-radius:12px;padding:10px 18px;font-size:clamp(.74rem,1.5vw,.8rem);font-weight:600;box-shadow:var(--sh3);opacity:0;transform:translateY(12px);transition:all .28s;text-align:center;font-family:var(--fd)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:var(--sage)}.toast.error{background:var(--coral)}.toast.info{background:var(--sky)}
+
+/* ══════════════════════════════════════
+   WELCOME SPLASH SCREEN
+══════════════════════════════════════ */
+.splash{
+  position:fixed;inset:0;z-index:2000;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.splash.open{display:flex}
+
+/* Role-specific gradients */
+.splash.admin{background:radial-gradient(ellipse at 40% 40%,#1a0a06,#0d0402)}
+.splash.faculty{background:radial-gradient(ellipse at 40% 40%,#060e1e,#020610)}
+.splash.student{background:radial-gradient(ellipse at 40% 40%,#021208,#010804)}
+.splash.class{background:radial-gradient(ellipse at 40% 40%,#1a0e00,#0d0700)}
+
+/* Animated bg grid */
+.splash::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--splash-grid-c,.08) 1px,transparent 1px),linear-gradient(90deg,var(--splash-grid-c,.08) 1px,transparent 1px);
+  background-size:48px 48px;animation:gridMove 20s linear infinite;opacity:.6;
+}
+.splash.admin{--splash-grid-c:rgba(214,79,42,.07)}
+.splash.faculty{--splash-grid-c:rgba(26,95,168,.08)}
+.splash.student{--splash-grid-c:rgba(26,140,82,.08)}
+.splash.class{--splash-grid-c:rgba(196,112,16,.08)}
+@keyframes gridMove{from{background-position:0 0}to{background-position:48px 48px}}
+
+/* Orb glow behind content */
+.splash-orb{
+  position:absolute;width:clamp(300px,80vw,600px);height:clamp(300px,80vw,600px);
+  border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none;
+  animation:orbPulse 3s ease-in-out infinite;
+}
+.splash.admin .splash-orb{background:radial-gradient(circle,rgba(214,79,42,.9),transparent 65%)}
+.splash.faculty .splash-orb{background:radial-gradient(circle,rgba(26,95,168,.9),transparent 65%)}
+.splash.student .splash-orb{background:radial-gradient(circle,rgba(26,140,82,.9),transparent 65%)}
+.splash.class .splash-orb{background:radial-gradient(circle,rgba(196,112,16,.9),transparent 65%)}
+@keyframes orbPulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.12);opacity:.45}}
+
+/* Content */
+.splash-content{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  padding:clamp(24px,6vw,48px) clamp(20px,6vw,48px);
+  text-align:center;max-width:min(640px,95vw);
+  animation:splashContentIn .6s cubic-bezier(.34,1.3,.64,1) .1s both;
+}
+@keyframes splashContentIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Emoji ring */
+.splash-emoji-wrap{
+  position:relative;width:clamp(80px,20vw,120px);height:clamp(80px,20vw,120px);
+  margin-bottom:clamp(20px,4vw,32px);
+}
+.splash-emoji-bg{
+  position:absolute;inset:0;border-radius:50%;
+  animation:emojiRingSpin 3s linear infinite;
+}
+.splash.admin .splash-emoji-bg{background:conic-gradient(from 0deg,var(--coral),var(--coral2),#f97316,var(--coral),var(--coral))}
+.splash.faculty .splash-emoji-bg{background:conic-gradient(from 0deg,var(--sky),var(--sky2),var(--violet),var(--sky),var(--sky))}
+.splash.student .splash-emoji-bg{background:conic-gradient(from 0deg,var(--sage),#2ec97a,#06d6a0,var(--sage),var(--sage))}
+.splash.class .splash-emoji-bg{background:conic-gradient(from 0deg,var(--amber),#f59e0b,#fbbf24,var(--amber),var(--amber))}
+@keyframes emojiRingSpin{to{transform:rotate(360deg)}}
+.splash-emoji-inner{
+  position:absolute;inset:3px;border-radius:50%;
+  display:grid;place-items:center;font-size:clamp(32px,8vw,52px);
+}
+.splash.admin .splash-emoji-inner{background:#1a0a06}
+.splash.faculty .splash-emoji-inner{background:#060e1e}
+.splash.student .splash-emoji-inner{background:#021208}
+.splash.class .splash-emoji-inner{background:#1a0e00}
+
+/* Role label */
+.splash-role{
+  font-size:clamp(.54rem,.9vw,.62rem);font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  margin-bottom:clamp(8px,2vw,12px);
+  animation:splashFadeUp .5s ease .4s both;
+}
+.splash.admin .splash-role{color:rgba(214,79,42,.7)}
+.splash.faculty .splash-role{color:rgba(100,149,237,.7)}
+.splash.student .splash-role{color:rgba(62,207,142,.7)}
+.splash.class .splash-role{color:rgba(245,166,35,.7)}
+@keyframes splashFadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Name */
+.splash-name{
+  font-family:var(--fd);font-size:clamp(1.4rem,5vw,2.6rem);font-weight:800;
+  color:#fff;letter-spacing:-.03em;line-height:1.1;margin-bottom:clamp(10px,3vw,16px);
+  text-shadow:0 0 40px var(--splash-glow,rgba(255,255,255,.2));
+  animation:splashFadeUp .5s ease .5s both;
+}
+.splash.admin .splash-name{--splash-glow:rgba(214,79,42,.5)}
+.splash.faculty .splash-name{--splash-glow:rgba(26,95,168,.5)}
+.splash.student .splash-name{--splash-glow:rgba(26,140,82,.5)}
+.splash.class .splash-name{--splash-glow:rgba(196,112,16,.5)}
+
+/* Message */
+.splash-msg{
+  font-size:clamp(.88rem,2.5vw,1.1rem);font-weight:500;
+  color:rgba(255,255,255,.65);line-height:1.6;max-width:min(480px,90vw);
+  margin-bottom:clamp(24px,5vw,36px);
+  animation:splashFadeUp .5s ease .6s both;
+}
+.splash-msg em{font-style:normal;font-weight:700;color:rgba(255,255,255,.9)}
+
+/* Loading bar */
+.splash-loader{
+  width:min(260px,70vw);height:4px;background:rgba(255,255,255,.08);
+  border-radius:4px;overflow:hidden;margin-bottom:clamp(12px,3vw,18px);
+  animation:splashFadeUp .5s ease .7s both;
+}
+.splash-loader-fill{
+  height:100%;border-radius:4px;
+  animation:loaderFill 2.5s cubic-bezier(.4,0,.6,1) .8s both;
+}
+.splash.admin .splash-loader-fill{background:linear-gradient(90deg,var(--coral),var(--coral2))}
+.splash.faculty .splash-loader-fill{background:linear-gradient(90deg,var(--sky),var(--sky2))}
+.splash.student .splash-loader-fill{background:linear-gradient(90deg,var(--sage),#2ec97a)}
+.splash.class .splash-loader-fill{background:linear-gradient(90deg,var(--amber),#f59e0b)}
+@keyframes loaderFill{from{width:0;opacity:.8}to{width:100%;opacity:1}}
+
+.splash-loading-txt{
+  font-family:var(--fm);font-size:clamp(.58rem,.9vw,.65rem);
+  color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;
+  animation:splashFadeUp .5s ease .75s both;
+}
+
+/* Floating particles */
+.splash-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.sp{position:absolute;border-radius:50%;animation:spFloat linear infinite}
+@keyframes spFloat{
+  0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+  10%{opacity:1}
+  90%{opacity:.6}
+  100%{transform:translateY(-20vh) rotate(360deg);opacity:0}
+}
+
+/* Mobile */
+@media(max-width:480px){
+  .brand-sub{display:none}
+  .live-pill span:not(.live-dot){display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wrap"><div class="bg-dots"></div></div>
+
+<!-- ══ WELCOME SPLASH ══ -->
+<div class="splash" id="splash">
+  <div class="splash-orb"></div>
+  <div class="splash-particles" id="splashParticles"></div>
+  <div class="splash-content">
+    <div class="splash-emoji-wrap">
+      <div class="splash-emoji-bg"></div>
+      <div class="splash-emoji-inner" id="splashEmoji">🎤</div>
+    </div>
+    <div class="splash-role" id="splashRole">Welcome</div>
+    <div class="splash-name" id="splashName">Loading…</div>
+    <div class="splash-msg" id="splashMsg">Preparing your dashboard…</div>
+    <div class="splash-loader"><div class="splash-loader-fill"></div></div>
+    <div class="splash-loading-txt" id="splashLoadTxt">Loading your portal…</div>
+  </div>
+</div>
+
+<!-- ══ PORTAL ══ -->
+<div class="portal">
+  <nav class="nav">
+    <div class="brand">
+      <div class="brand-mark">🎤</div>
+      <div>
+        <div class="brand-name">Extempore</div>
+        <div class="brand-sub">Speech Assessment Portal</div>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="live-pill"><span class="live-dot"></span><span>Live</span></div>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="eyebrow">Speech Excellence Platform</div>
+    <h1 class="headline">Welcome to <em>Extempore</em></h1>
+    <p class="sub">Sign in with your credentials — you'll be directed to the right portal automatically.</p>
+
+    <div class="card">
+      <div class="card-bar"></div>
+      <div class="card-inner">
+
+        <!-- Username -->
+        <div class="field">
+          <label class="field-label" for="username">Username / Roll Number</label>
+          <div class="field-wrap">
+            <input class="field-input" type="text" id="username"
+              placeholder="Username or roll number"
+              autocomplete="username" autocorrect="off" autocapitalize="off"
+              spellcheck="false" inputmode="text"
+              oninput="clearErr()" onkeydown="onKey(event)">
+            <span class="field-icon">👤</span>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="field" style="margin-bottom:clamp(16px,4vw,20px)">
+          <label class="field-label" for="password">Password</label>
+          <div class="field-wrap">
+            <input class="field-input" type="password" id="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              oninput="clearErr()" onkeydown="onKey(event)">
+            <button class="pass-eye" type="button" id="eyeBtn" onclick="togglePass()" tabindex="-1">👁</button>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="err-box" id="errBox"></div>
+
+        <!-- Submit -->
+        <button class="submit-btn" id="loginBtn" onclick="doLogin()">
+          <span id="btnTxt">Sign In →</span>
+          <div class="spin" id="btnSpin"></div>
+        </button>
+      </div>
+      <div class="card-foot">Role detected automatically from your credentials</div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>Extempore v2.0</span> · Academic Speech Assessment · <span id="footDate"></span>
+  </footer>
+</div>
+
+<div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+<script>
+const GAS_URL="https://script.google.com/macros/s/AKfycbzNuO53W_gs8iFO2H0VRsf_MMYim0_AyXxMLDYseb02siHZHS4GEbJYQ64NXTspo5IT0Q/exec";
+
+// ── SPLASH CONFIG ──
+const SPLASH_CFG={
+  admin:{
+    emoji:'🛡️',role:'Administrator',
+    msgs:[
+      'You have the power to shape the entire programme. <em>Lead with purpose.</em>',
+      'Every great institution runs on great leadership. <em>Welcome back, Admin.</em>',
+      'Managing systems, enabling success. <em>Your work makes it all possible.</em>',
+    ],
+    loadTxt:'Initialising admin dashboard…',
+  },
+  faculty:{
+    emoji:'👩‍🏫',role:'Faculty Member',
+    msgs:[
+      'Your guidance transforms nervous speakers into <em>confident communicators.</em>',
+      'Great teachers don\'t just teach — they <em>inspire for a lifetime.</em>',
+      'Every speech you assess shapes a student\'s future. <em>You matter.</em>',
+      'The best faculty don\'t just grade — they <em>believe and uplift.</em>',
+    ],
+    loadTxt:'Loading faculty dashboard…',
+  },
+  student:{
+    emoji:'🎓',role:'Student',
+    msgs:[
+      'Every speech is a step forward. <em>Keep going — you\'re growing.</em>',
+      'The mic is yours. <em>Speak up, stand tall, make your voice heard.</em>',
+      'Progress, not perfection. <em>Each attempt makes you stronger.</em>',
+      'Today\'s practice is tomorrow\'s confidence. <em>You\'ve got this!</em>',
+    ],
+    loadTxt:'Loading your performance…',
+  },
+  class:{
+    emoji:'🎡',role:'Class Session',
+    msgs:[
+      'The stage is set. <em>Let the best speakers shine today!</em>',
+      'Spin the wheel, pick your champion. <em>Time to assess greatness.</em>',
+      'Every extempore session builds <em>real-world communication skills.</em>',
+    ],
+    loadTxt:'Starting class session…',
+  },
+};
+
+// ── Clock ──
+function tick(){
+  const n=new Date(),p=v=>String(v).padStart(2,'0');
+  const wide=window.innerWidth>480;
+  document.getElementById('clock').textContent=p(n.getHours())+':'+p(n.getMinutes())+(wide?':'+p(n.getSeconds()):'');
+  document.getElementById('footDate').textContent=n.toLocaleDateString('en-IN',{weekday:wide?'long':'short',day:'numeric',month:wide?'long':'short',year:'numeric'});
+}
+setInterval(tick,1000);tick();
+
+// ── Toast ──
+let _tt;
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3400);
+}
+
+// ── Password toggle ──
+function togglePass(){
+  const p=document.getElementById('password'),e=document.getElementById('eyeBtn');
+  p.type=p.type==='password'?'text':'password';
+  e.textContent=p.type==='password'?'👁':'🙈';
+}
+
+function onKey(e){if(e.key==='Enter'){e.preventDefault();doLogin();}}
+function clearErr(){document.getElementById('errBox').className='err-box';}
+function showErr(msg){const el=document.getElementById('errBox');el.textContent=msg;el.className='err-box show';}
+
+// ── JSONP ──
+let _cb=0;
+function api(action,payload){
+  payload=payload||{};
+  return new Promise((res,rej)=>{
+    const name='__cb_'+(++_cb);
+    const params=new URLSearchParams(Object.assign({action,callback:name},payload));
+    const timer=setTimeout(()=>{delete window[name];rej(new Error('Request timed out'));},20000);
+    window[name]=json=>{
+      clearTimeout(timer);delete window[name];
+      const sc=document.getElementById('__s'+name);if(sc)sc.remove();
+      if(json&&json.ok)res(json.data);else rej(new Error((json&&json.error)||'API Error'));
+    };
+    const s=document.createElement('script');
+    s.id='__s'+name;s.src=GAS_URL+'?'+params.toString();
+    s.onerror=()=>{clearTimeout(timer);delete window[name];s.remove();rej(new Error('Network error'));};
+    document.head.appendChild(s);
+  });
+}
+
+// ── Loading ──
+function setLoading(on){
+  const btn=document.getElementById('loginBtn');
+  document.getElementById('btnTxt').textContent=on?'Signing in…':'Sign In →';
+  document.getElementById('btnSpin').style.display=on?'block':'none';
+  btn.disabled=on;
+}
+
+function friendlyErr(msg){
+  if(!msg)return'Login failed. Please try again.';
+  if(msg.includes('not found')||msg.includes("User '"))return'Incorrect username or password.';
+  if(msg.includes('inactive'))return'Your account is inactive. Contact administrator.';
+  if(msg.includes('Incorrect password'))return'Incorrect password. Please try again.';
+  if(msg.includes('timed out')||msg.includes('Network'))return'Connection failed. Please try again.';
+  return'Login failed. Please try again.';
+}
+
+// ── SPLASH ──
+function spawnParticles(role){
+  const colors={
+    admin:['#d64f2a','#e8673d','#f97316','#fbbf24'],
+    faculty:['#1a5fa8','#2070c8','#6366f1','#a78bfa'],
+    student:['#1a8c52','#2ec97a','#06d6a0','#a3e635'],
+    class:['#c47010','#f59e0b','#fbbf24','#fde68a'],
+  };
+  const palette=colors[role]||colors.admin;
+  const container=document.getElementById('splashParticles');
+  container.innerHTML='';
+  for(let i=0;i<22;i++){
+    const p=document.createElement('div');
+    p.className='sp';
+    const size=4+Math.random()*8;
+    const left=Math.random()*100;
+    const dur=4+Math.random()*6;
+    const delay=Math.random()*4;
+    const col=palette[Math.floor(Math.random()*palette.length)];
+    p.style.cssText=`width:${size}px;height:${size}px;left:${left}%;bottom:-10%;background:${col};opacity:.6;animation-duration:${dur}s;animation-delay:${delay}s;filter:blur(${Math.random()>.5?'0px':'1px'})`;
+    container.appendChild(p);
+  }
+}
+
+function showSplash(role,name,redirect){
+  const cfg=SPLASH_CFG[role]||SPLASH_CFG.student;
+  const msgs=cfg.msgs;
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  const splash=document.getElementById('splash');
+
+  // Set role class
+  splash.className='splash open '+role;
+
+  // Set content
+  document.getElementById('splashEmoji').textContent=cfg.emoji;
+  document.getElementById('splashRole').textContent=cfg.role;
+  document.getElementById('splashName').textContent='Hello, '+name+'!';
+  document.getElementById('splashMsg').innerHTML=msg;
+  document.getElementById('splashLoadTxt').textContent=cfg.loadTxt;
+
+  // Spawn particles
+  spawnParticles(role);
+
+  // Redirect after 2.8s (enough to see the animation + loader completes at ~3.3s)
+  setTimeout(()=>window.location.href=redirect, 2800);
+}
+
+// ── MAIN LOGIN ──
+async function doLogin(){
+  const username=(document.getElementById('username').value||'').trim();
+  const password=(document.getElementById('password').value||'').trim();
+  clearErr();
+  if(!username){showErr('Please enter your username or roll number.');document.getElementById('username').focus();return;}
+  if(!password){showErr('Please enter your password.');document.getElementById('password').focus();return;}
+  setLoading(true);
+
+  try{
+    // Try student (roll number)
+    const looksLikeRoll=/^[A-Z0-9]{5,12}$/i.test(username);
+    if(looksLikeRoll){
+      try{
+        const rollNo=username.toUpperCase();
+        const data=await api('getStudentByRoll',{rollNo});
+        const student=data&&data.student;
+        if(student){
+          const passOk=password===rollNo||password===username||password===username.toLowerCase()||password===username.toUpperCase();
+          if(!passOk){showErr('Incorrect password. Default password is your Roll Number.');setLoading(false);return;}
+          sessionStorage.setItem('ep_role','student');
+          sessionStorage.setItem('ep_rollno',student.rollNo);
+          sessionStorage.setItem('ep_name',student.name||student.rollNo);
+          sessionStorage.setItem('ep_year',student.year||'');
+          sessionStorage.setItem('ep_section',student.section||'');
+          setLoading(false);
+          showSplash('student',student.name||student.rollNo,'student.html');
+          return;
+        }
+      }catch(e){}
+    }
+
+    // UsersDB
+    const data=await api('login',{username,password});
+    const role=data.role;
+    const displayName=data.displayName||data.username||username;
+    sessionStorage.setItem('ep_role',role);
+    sessionStorage.setItem('ep_name',displayName);
+    sessionStorage.setItem('ep_username',data.username||username);
+
+    if(role==='admin'){
+      setLoading(false);
+      showSplash('admin',displayName,'admin.html');
+    }else if(role==='faculty'){
+      sessionStorage.setItem('ep_classes',JSON.stringify(data.classes||[]));
+      if(data.classes&&data.classes.length){
+        sessionStorage.setItem('ep_year',data.classes[0].year||'');
+        sessionStorage.setItem('ep_section',data.classes[0].section||'');
+      }
+      setLoading(false);
+      showSplash('faculty',displayName,'faculty.html');
+    }else if(role==='class'){
+      sessionStorage.setItem('ep_year',data.year||'');
+      sessionStorage.setItem('ep_section',data.section||'');
+      setLoading(false);
+      showSplash('class',displayName,'faculty.html');
+    }else{
+      showErr('Unknown role. Contact administrator.');
+      setLoading(false);
+    }
+  }catch(e){
+    showErr(friendlyErr(e.message));
+    setLoading(false);
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>document.getElementById('username').focus(),300);
+});
+</script>
+</body>
+</html>

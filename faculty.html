@@ -136,7 +136,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--ink);-webkit-font-sm
 .toast.error{background:var(--coral-l);color:var(--coral);border-color:var(--coral-m)}
 .toast.info{background:var(--sky-l);color:var(--sky);border-color:var(--sky-m)}
 .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
-.gaming-overlay{position:fixed;inset:0;z-index:900;background:radial-gradient(ellipse at 50% 20%,#1a1040 0%,#0a0618 60%,#030208 100%);display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.gaming-overlay{position:fixed;inset:0;z-index:900;background:radial-gradient(ellipse at 50% 20%,#1a1040 0%,#0a0618 60%,#030208 100%);display:none;flex-direction:column;align-items:center;justify-content:center;overflow:hidden auto;-webkit-overflow-scrolling:touch}
 .gaming-overlay.open{display:flex;animation:gmIn .35s ease}
 @keyframes gmIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 .gaming-overlay::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(139,92,246,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.08) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;animation:gridMove 20s linear infinite}
@@ -149,6 +149,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--ink);-webkit-font-sm
 .gm-content{display:flex;gap:20px;align-items:flex-start;justify-content:center;z-index:1;position:relative;flex-wrap:wrap}
 .gm-wheel-sec{display:flex;flex-direction:column;align-items:center;gap:10px}
 .gm-wlabel{font-family:var(--fd);font-size:.6rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);text-shadow:0 0 12px rgba(167,139,250,.4)}
+.gm-canvas{max-width:100%;height:auto;display:block}
 .gm-wptr{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:22px;filter:drop-shadow(0 0 10px #fb923c);z-index:5;pointer-events:none;animation:ptBob 1.6s ease-in-out infinite}
 @keyframes ptBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-4px)}}
 .gm-result-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 18px;min-width:195px;text-align:center;min-height:54px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);transition:all .3s}
@@ -261,11 +262,35 @@ body{font-family:var(--fn);background:var(--bg);color:var(--ink);-webkit-font-sm
   .timer-display{font-size:2.3rem}
   .star-btn{width:36px;height:36px;font-size:18px}
   .overall-num{font-size:2.3rem}
-  .gm-content{gap:12px}
-  .gm-timer-num{font-size:3rem}
   .date-bar{gap:8px}
   .m-body{padding:14px}
   .modal{max-height:95dvh}
+
+  /* ── GAMING OVERLAY MOBILE ── */
+  .gaming-overlay{padding:12px 8px;justify-content:flex-start;overflow-y:auto;padding-top:52px}
+  .gm-close{top:10px;right:10px;font-size:.62rem;padding:5px 10px}
+  .gm-header{margin-bottom:10px}
+  .gm-title{font-size:.72rem;letter-spacing:.1em}
+  .gm-sub{font-size:.56rem}
+  .gm-content{flex-direction:column;gap:8px;width:100%;align-items:center}
+  .gm-wheel-sec{width:100%;max-width:320px}
+  .gm-wlabel{font-size:.54rem;letter-spacing:.14em;margin-bottom:2px}
+  .gm-result-box{min-width:0;width:100%;padding:7px 12px;min-height:42px}
+  .gm-rname{font-size:.78rem}
+  .gm-rsub{font-size:.56rem}
+  .gm-timer-col{width:100%;max-width:320px;padding:10px 0 4px}
+  .gm-timer-num{font-size:2.4rem}
+  .gm-actions{gap:7px;margin-top:10px;width:100%;justify-content:center}
+  .btn-gaming{font-size:.72rem;padding:9px 14px;border-radius:11px}
+}
+
+@media(max-width:480px){
+  .gaming-overlay{padding:8px 6px;padding-top:46px}
+  .gm-title{font-size:.64rem}
+  .gm-timer-num{font-size:2rem}
+  .gm-wheel-sec{max-width:290px}
+  .gm-timer-col{max-width:290px}
+  .btn-gaming{font-size:.66rem;padding:8px 12px}
 }
 @media(max-width:480px){
   .g4{grid-template-columns:1fr 1fr}
@@ -295,12 +320,12 @@ body{font-family:var(--fn);background:var(--bg);color:var(--ink);-webkit-font-sm
   <div class="gm-content">
     <div class="gm-wheel-sec">
       <div class="gm-wlabel">&#128101; STUDENT WHEEL</div>
-      <div style="position:relative"><canvas id="gmSC" width="230" height="230"></canvas><div class="gm-wptr">&#9660;</div></div>
+      <div style="position:relative"><canvas id="gmSC" width="230" height="230" style="max-width:100%;height:auto"></canvas><div class="gm-wptr">&#9660;</div></div>
       <div class="gm-result-box" id="gmStudentResult"><div style="color:rgba(255,255,255,.3);font-size:.74rem">Spin to pick a student</div></div>
     </div>
     <div class="gm-wheel-sec">
       <div class="gm-wlabel">&#128221; TOPIC WHEEL</div>
-      <div style="position:relative"><canvas id="gmTC" width="230" height="230"></canvas><div class="gm-wptr">&#9660;</div></div>
+      <div style="position:relative"><canvas id="gmTC" width="230" height="230" style="max-width:100%;height:auto"></canvas><div class="gm-wptr">&#9660;</div></div>
       <div class="gm-result-box" id="gmTopicResult"><div style="color:rgba(255,255,255,.3);font-size:.74rem">Spin to pick a topic</div></div>
     </div>
     <div class="gm-timer-col">
@@ -968,6 +993,10 @@ function renderWheels(){
   updateConfirmPreview();
 }
 function redrawGmWheels(){
+  // Responsive canvas sizing for gaming mode
+  const isMobile=window.innerWidth<=768;
+  const gmSize=isMobile?Math.min(window.innerWidth-40,260):230;
+  ['gmSC','gmTC'].forEach(id=>{const c=document.getElementById(id);if(c){c.width=gmSize;c.height=gmSize;}});
   const pending=allStudents.filter(s=>s.status!=='Completed');
   drawWheel('gmSC',pending,gmSA,'name','rgba(139,92,246,.8)',WCOLORS_STUDENT,true);
   drawWheel('gmTC',filteredTopics,gmTA,'topicName','rgba(249,115,22,.8)',WCOLORS_TOPIC,false);
@@ -1180,6 +1209,9 @@ window.addEventListener('resize',()=>{
   if(window.innerWidth>768){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbOverlay').classList.remove('open');}
   renderWheels();
   if(document.getElementById('gamingOverlay').classList.contains('open'))redrawGmWheels();
+});
+window.addEventListener('orientationchange',()=>{
+  setTimeout(()=>{renderWheels();if(document.getElementById('gamingOverlay').classList.contains('open'))redrawGmWheels();},200);
 });
 
 (async function init(){

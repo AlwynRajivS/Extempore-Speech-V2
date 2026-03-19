@@ -149,12 +149,8 @@ This project is for **educational and research purposes**.
 
 **Alwyn Rajiv S.**
 Assistant Professor — ECE
-💡 Passionate about AI, IoT & Education Technology
+
 
 ---
 
-## ⭐ Support
 
-If you like this project, give it a ⭐ on GitHub!
-
----

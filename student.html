@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Student Portal — Extempore</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4ff;--bg2:#e8edf8;--bg3:#dde4f5;--bg4:#d0d9f0;
+  --surf:#ffffff;--surf2:#f7f9fe;
+  --bdr:rgba(99,120,220,.12);--bdr2:rgba(99,120,220,.22);
+  --ink:#111827;--ink2:#374151;--ink3:#6b7280;--muted:#9ca3af;
+  --sky:#2563eb;--sky2:#3b82f6;--sky-l:rgba(37,99,235,.1);--sky-m:rgba(37,99,235,.2);
+  --coral:#e5470a;--coral-l:rgba(229,71,10,.1);--coral-m:rgba(229,71,10,.2);
+  --sage:#059669;--sage2:#10b981;--sage-l:rgba(5,150,105,.1);--sage-m:rgba(5,150,105,.2);
+  --amber:#d97706;--amber2:#f59e0b;--amber-l:rgba(217,119,6,.1);--amber-m:rgba(217,119,6,.2);
+  --violet:#7c3aed;--violet2:#8b5cf6;--violet-l:rgba(124,58,237,.1);--violet-m:rgba(124,58,237,.2);
+  --pink:#db2777;--pink-l:rgba(219,39,119,.1);--pink-m:rgba(219,39,119,.2);
+  --sh1:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(37,99,235,.08);
+  --sh2:0 4px 20px rgba(37,99,235,.12);
+  --sh3:0 12px 40px rgba(37,99,235,.16);
+  --fn:'DM Sans',sans-serif;--fd:'Syne',sans-serif;--fm:'JetBrains Mono',monospace;
+  --r:18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{min-height:100vh;font-family:var(--fn);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 900px 600px at 95% 0%,rgba(37,99,235,.08) 0%,transparent 55%),
+  radial-gradient(ellipse 600px 500px at 5% 95%,rgba(124,58,237,.07) 0%,transparent 55%),
+  radial-gradient(ellipse 500px 400px at 50% 50%,rgba(5,150,105,.05) 0%,transparent 60%);}
+.app{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 16px 80px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:1px solid var(--bdr);margin-bottom:4px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,var(--sky),var(--violet));display:grid;place-items:center;font-size:17px;box-shadow:0 4px 14px rgba(37,99,235,.3);flex-shrink:0}
+.brand-title{font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--ink)}
+.brand-sub{font-size:.52rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:1px}
+.tb-right{display:flex;align-items:center;gap:7px}
+.roll-badge{font-family:var(--fm);font-size:.72rem;font-weight:600;background:var(--sky-l);border:1.5px solid var(--sky-m);color:var(--sky);padding:5px 11px;border-radius:20px}
+.tb-btn{background:var(--bg3);border:1px solid var(--bdr2);border-radius:9px;padding:6px 11px;font-family:var(--fn);font-size:.68rem;font-weight:700;color:var(--ink3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.tb-btn:hover{background:var(--coral-l);color:var(--coral);border-color:var(--coral-m)}
+.tb-pdf{background:var(--violet-l);border:1.5px solid var(--violet-m);color:var(--violet)}
+.tb-pdf:hover{background:var(--violet);color:#fff;border-color:var(--violet)}
+.hero-card{background:linear-gradient(135deg,var(--sky) 0%,var(--violet) 100%);border-radius:24px;padding:26px 22px 22px;margin:16px 0 18px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(37,99,235,.28)}
+.hero-card::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none}
+.hero-card::after{content:'';position:absolute;bottom:-30px;left:-20px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none}
+.hero-eyebrow{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:7px}
+.hero-name{font-family:var(--fd);font-size:1.7rem;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1.15;margin-bottom:8px}
+.hero-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.hero-chip{background:rgba(255,255,255,.16);border-radius:20px;padding:3px 11px;font-size:.68rem;font-weight:600;color:rgba(255,255,255,.92);backdrop-filter:blur(8px)}
+.hero-status{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 16px;font-size:.74rem;font-weight:700;color:#fff;backdrop-filter:blur(8px)}
+.hero-status.pending{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.8)}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-done{background:#34d399;box-shadow:0 0 8px rgba(52,211,153,.8)}
+.dot-pend{background:#fbbf24;box-shadow:0 0 8px rgba(251,191,36,.8)}
+.sec-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sec-dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--violet));flex-shrink:0}
+.sec-title{font-family:var(--fd);font-size:.88rem;font-weight:800;color:var(--ink)}
+.overall-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:22px;margin-bottom:14px;box-shadow:var(--sh1);position:relative;overflow:hidden}
+.overall-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;background:linear-gradient(90deg,var(--sky),var(--violet),var(--pink))}
+.oc-top{display:flex;align-items:center;gap:18px;margin-bottom:18px}
+.ring-wrap{position:relative;width:88px;height:88px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--bg3);stroke-width:7}
+.ring-fill{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-family:var(--fm);font-size:1.45rem;font-weight:700;color:var(--ink);line-height:1}
+.ring-denom{font-size:.56rem;color:var(--muted);margin-top:1px}
+.oc-right{flex:1}
+.oc-stars{display:flex;gap:4px;margin-bottom:7px}
+.oc-star{font-size:20px;color:var(--amber)}
+.oc-star.e{color:var(--bg3)}
+.oc-grade{display:inline-block;font-family:var(--fd);font-size:.78rem;font-weight:800;border-radius:20px;padding:3px 12px;margin-bottom:4px}
+.oc-desc{font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.score-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--surf2);border:1px solid var(--bdr);border-radius:20px;padding:5px 10px;font-size:.68rem;font-weight:600;color:var(--ink2)}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pill-val{font-family:var(--fm);font-weight:700;font-size:.7rem}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat-card{background:var(--surf2);border:1px solid var(--bdr);border-radius:14px;padding:13px;transition:all .2s}
+.cat-card:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:var(--bdr2)}
+.cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.cat-name{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.cat-val{font-family:var(--fm);font-size:.78rem;font-weight:700}
+.cat-stars{display:flex;gap:2px;margin-bottom:7px}
+.cat-star{font-size:12px}
+.cat-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1);width:0}
+.topic-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:16px 18px;margin-bottom:14px;box-shadow:var(--sh1);display:flex;align-items:center;gap:14px;position:relative;overflow:hidden}
+.topic-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--sky),var(--violet));border-radius:var(--r) 0 0 var(--r)}
+.topic-icon{width:44px;height:44px;border-radius:13px;background:var(--sky-l);border:1.5px solid var(--sky-m);display:grid;place-items:center;font-size:1.2rem;flex-shrink:0}
+.topic-content{flex:1;min-width:0}
+.topic-label{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--sky);margin-bottom:4px}
+.topic-name{font-family:var(--fd);font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topic-meta{font-size:.68rem;color:var(--ink3);font-family:var(--fm)}
+.remarks-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh1)}
+.rem-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.rem-icon{width:34px;height:34px;border-radius:10px;background:var(--amber-l);border:1px solid var(--amber-m);display:grid;place-items:center;font-size:1rem;flex-shrink:0}
+.rem-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--amber)}
+.rem-quote{background:linear-gradient(135deg,var(--amber-l),rgba(245,158,11,.04));border-left:3px solid var(--amber2);border-radius:0 12px 12px 0;padding:12px 16px;font-size:.84rem;color:var(--ink2);line-height:1.75;font-style:italic;margin-bottom:10px}
+.rem-by{font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.rem-dash{width:18px;height:1.5px;background:var(--bdr2);border-radius:1px}
+.motive-card{background:linear-gradient(135deg,var(--sage-l),var(--sky-l));border:1px solid var(--sage-m);border-radius:var(--r);padding:18px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start}
+.motive-icon{font-size:1.8rem;flex-shrink:0;margin-top:2px}
+.motive-body{flex:1}
+.motive-title{font-family:var(--fd);font-size:.82rem;font-weight:800;color:var(--sage);margin-bottom:5px}
+.motive-text{font-size:.8rem;color:var(--ink2);line-height:1.7}
+.ai-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:14px;box-shadow:var(--sh1)}
+.ai-card-hd{background:linear-gradient(135deg,var(--violet-l),var(--pink-l));border-bottom:1px solid var(--bdr);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ai-hd-left{display:flex;align-items:center;gap:10px}
+.ai-icon{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--violet),var(--pink));display:grid;place-items:center;font-size:1.1rem;box-shadow:0 4px 12px rgba(124,58,237,.3);flex-shrink:0}
+.ai-card-title{font-family:var(--fd);font-size:.86rem;font-weight:800;color:var(--ink)}
+.ai-card-sub{font-size:.62rem;color:var(--muted);margin-top:1px}
+.ai-regen{background:var(--violet-l);border:1.5px solid var(--violet-m);color:var(--violet);border-radius:10px;padding:6px 12px;font-family:var(--fn);font-size:.68rem;font-weight:700;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.ai-regen:hover{background:var(--violet);color:#fff}
+.ai-body{padding:18px}
+.ai-content{font-size:.81rem;color:var(--ink2);line-height:1.8}
+.ai-shd{font-family:var(--fd);font-size:.8rem;font-weight:800;color:var(--violet);margin:14px 0 5px;letter-spacing:.02em}
+.ai-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.8rem;padding:8px 0}
+.ai-spinner{width:17px;height:17px;border:2.5px solid var(--bg3);border-top-color:var(--violet);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.tip-card{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:15px;transition:all .2s;box-shadow:var(--sh1)}
+.tip-card:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.tip-icon{font-size:1.4rem;margin-bottom:7px}
+.tip-title{font-family:var(--fd);font-size:.76rem;font-weight:700;color:var(--ink);margin-bottom:4px}
+.tip-desc{font-size:.68rem;color:var(--ink3);line-height:1.65}
+.tip-tag{display:inline-block;margin-top:8px;font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:20px}
+.empty-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:46px 22px;text-align:center;margin-bottom:16px;box-shadow:var(--sh1)}
+.empty-icon{font-size:2.8rem;margin-bottom:12px;display:block;animation:floatAnim 3s ease-in-out infinite}
+@keyframes floatAnim{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.empty-title{font-family:var(--fd);font-size:1.15rem;font-weight:800;color:var(--ink);margin-bottom:8px}
+.empty-sub{font-size:.8rem;color:var(--ink3);max-width:300px;margin:0 auto;line-height:1.7}
+.steps{display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left}
+.step{display:flex;align-items:flex-start;gap:12px;background:var(--surf2);border:1px solid var(--bdr);border-radius:14px;padding:12px}
+.step-num{width:26px;height:26px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--sky),var(--violet));color:#fff;font-size:.7rem;font-weight:800;font-family:var(--fd);display:grid;place-items:center}
+.step-text{font-size:.76rem;color:var(--ink2);line-height:1.6;padding-top:2px}
+.step-text strong{color:var(--ink);font-weight:700}
+.fab-pdf{position:fixed;bottom:22px;right:18px;z-index:500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--pink));border:none;color:#fff;font-size:1.3rem;box-shadow:0 6px 20px rgba(124,58,237,.4);cursor:pointer;transition:all .2s;display:none;place-items:center}
+.fab-pdf:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(124,58,237,.55)}
+.toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;white-space:nowrap}
+.toast{background:var(--surf);color:var(--ink);border:1px solid var(--bdr2);border-radius:14px;padding:10px 20px;font-size:.78rem;font-weight:600;box-shadow:var(--sh2);opacity:0;transform:translateY(12px);transition:all .28s;font-family:var(--fd)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:var(--sage-l);color:var(--sage);border-color:var(--sage-m)}
+.toast.error{background:var(--coral-l);color:var(--coral);border-color:var(--coral-m)}
+.toast.info{background:var(--sky-l);color:var(--sky);border-color:var(--sky-m)}
+@media(max-width:520px){
+  .hero-name{font-size:1.45rem}.cat-grid{grid-template-columns:1fr}.tips-grid{grid-template-columns:1fr}
+  .ring-num{font-size:1.25rem}.ring-wrap{width:78px;height:78px}.app{padding:0 12px 80px}
+}
+@media(max-width:360px){.score-pills{gap:4px}.score-pill{font-size:.62rem;padding:4px 8px}.hero-name{font-size:1.25rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">&#127891;</div>
+      <div><div class="brand-title">Extempore</div><div class="brand-sub">Student Portal</div></div>
+    </div>
+    <div class="tb-right">
+      <div class="roll-badge" id="rollDisplay">–</div>
+      <button class="tb-btn tb-pdf" onclick="downloadPDF()" id="pdfBtn" style="display:none">&#128196; PDF</button>
+      <button class="tb-btn" onclick="logout()">&#8592; Exit</button>
+    </div>
+  </div>
+  <div id="mainContent">
+    <div class="empty-card" style="margin-top:20px">
+      <span class="empty-icon">&#9203;</span>
+      <div class="empty-title">Loading your dashboard&hellip;</div>
+      <div class="empty-sub">Fetching your speech assessment data.</div>
+    </div>
+  </div>
+</div>
+<button class="fab-pdf" id="fabPdf" onclick="downloadPDF()" title="Download PDF">&#128196;</button>
+<div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+<script>
+const WEBAPP_URL='https://script.google.com/macros/s/AKfycbzXexjCE8BAoY2CTISQJV2R_Rfzx6ncySFsX-O3e3upfCA7DqGgJAbE8o3y9hZnPcsqJw/exec';
+const GROQ_KEY=()=>localStorage.getItem('ep_groq_key')||'';
+const CATS=[
+  {key:'content',       label:'Content',    color:'#2563eb',grad:'#3b82f6'},
+  {key:'delivery',      label:'Delivery',   color:'#059669',grad:'#10b981'},
+  {key:'confidence',    label:'Confidence', color:'#e5470a',grad:'#f97316'},
+  {key:'vocabulary',    label:'Vocabulary', color:'#d97706',grad:'#f59e0b'},
+  {key:'timeManagement',label:'Time Mgmt',  color:'#7c3aed',grad:'#a855f7'},
+];
+
+if(sessionStorage.getItem('ep_role')!=='student')window.location.href='index.html';
+const ROLL=(sessionStorage.getItem('ep_rollno')||'').toUpperCase();
+document.getElementById('rollDisplay').textContent=ROLL;
+
+let _cb=0;
+function api(action,payload={}){
+  return new Promise((res,rej)=>{
+    const name='__cb_'+(++_cb);
+    const params=new URLSearchParams({action,callback:name,...payload});
+    const timer=setTimeout(()=>{delete window[name];rej(new Error('Timeout'));},22000);
+    window[name]=json=>{clearTimeout(timer);delete window[name];document.getElementById('__s'+name)?.remove();if(json?.ok)res(json.data);else rej(new Error(json?.error||'API Error'));};
+    const s=document.createElement('script');s.id='__s'+name;s.src=WEBAPP_URL+'?'+params;
+    s.onerror=()=>{clearTimeout(timer);delete window[name];s.remove();rej(new Error('Network error'));};
+    document.head.appendChild(s);
+  });
+}
+
+let _tt;
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3500);}
+
+let SD=null,PD=null,AI_TEXT='';
+
+// KEY FIX: GAS returns ratings.content, ratings.delivery etc (NO 'Rating' suffix)
+// But speech log entries have contentRating, deliveryRating etc (WITH 'Rating' suffix)
+// Normalise everything to have the 'Rating' suffix
+function normalise(ratingsObj,speech){
+  const p={};
+  if(ratingsObj){
+    CATS.forEach(c=>{
+      // Try both with and without 'Rating' suffix
+      p[c.key+'Rating']=parseFloat(ratingsObj[c.key]||ratingsObj[c.key+'Rating']||0);
+    });
+    p.overallRating=parseFloat(ratingsObj.overall||ratingsObj.overallRating||0);
+  }
+  if(speech){
+    CATS.forEach(c=>{
+      const v=parseFloat(speech[c.key+'Rating']||0);
+      if(v>0)p[c.key+'Rating']=v;
+    });
+    const ov=parseFloat(speech.overallRating||0);
+    if(ov>0)p.overallRating=ov;
+    p.topicNo   =speech.topicNo   ||p.topicNo   ||'';
+    p.topicName =speech.topicName ||p.topicName ||'';
+    p.speechDate=speech.speechDate||p.speechDate||'';
+    p.comments  =speech.comments  ||p.comments  ||'';
+    p.faculty   =speech.faculty   ||p.faculty   ||'';
+  }
+  return p;
+}
+
+async function init(){
+  try{
+    const data=await api('getStudentPerf',{rollNo:ROLL});
+    SD=data.student||{};
+    const speeches=data.speeches||[];
+    const latest=speeches.length?speeches[speeches.length-1]:null;
+    PD=normalise(data.ratings,latest);
+    // Fallback metadata from student record
+    if(SD.topicNo&&!PD.topicNo)PD.topicNo=SD.topicNo;
+    if(SD.speechDate&&!PD.speechDate)PD.speechDate=SD.speechDate;
+    if(SD.comments&&!PD.comments)PD.comments=SD.comments;
+    render();
+  }catch(e){
+    try{const sd=await api('getStudentByRoll',{rollNo:ROLL});SD=sd.student||{};PD={};render();}
+    catch(e2){document.getElementById('mainContent').innerHTML=notFound(e2.message);}
+  }
+}
+
+function getGrade(r){
+  if(r>=4.5)return{label:'A+  Excellent',   desc:'Outstanding — Top Tier!',       cl:'#059669',bg:'rgba(5,150,105,.12)',  br:'rgba(5,150,105,.3)'};
+  if(r>=4.0)return{label:'A   Very Good',   desc:'Strong performance',             cl:'#2563eb',bg:'rgba(37,99,235,.1)',   br:'rgba(37,99,235,.28)'};
+  if(r>=3.5)return{label:'B+  Good',        desc:'Above average — keep climbing',  cl:'#7c3aed',bg:'rgba(124,58,237,.1)', br:'rgba(124,58,237,.28)'};
+  if(r>=3.0)return{label:'B   Satisfactory',desc:'Decent — clear room to grow',    cl:'#d97706',bg:'rgba(217,119,6,.1)',  br:'rgba(217,119,6,.28)'};
+  if(r>=2.0)return{label:'C   Needs Work',  desc:'Keep practising consistently',   cl:'#e5470a',bg:'rgba(229,71,10,.1)',  br:'rgba(229,71,10,.28)'};
+  return          {label:'D   Keep Going',  desc:'Every expert was once a beginner',cl:'#e5470a',bg:'rgba(229,71,10,.08)',br:'rgba(229,71,10,.22)'};
+}
+
+function render(){
+  const s=SD||{},p=PD||{};
+  const done=s.status==='Completed';
+  const ov=parseFloat(p.overallRating)||0;
+  const has=ov>0;
+  const g=getGrade(ov);
+  let h='';
+
+  // HERO
+  h+=`<div class="hero-card">
+    <div class="hero-eyebrow">Student Performance Dashboard</div>
+    <div class="hero-name">${s.name||ROLL}</div>
+    <div class="hero-chips">
+      <span class="hero-chip">${ROLL}</span>
+      <span class="hero-chip">Year ${s.year||'–'}</span>
+      <span class="hero-chip">Sec ${s.section||'–'}</span>
+    </div>
+    ${done
+      ?`<div class="hero-status"><div class="status-dot dot-done"></div>Completed &nbsp;&middot;&nbsp; ${p.speechDate||s.speechDate||''}</div>`
+      :`<div class="hero-status pending"><div class="status-dot dot-pend"></div>Speech Pending</div>`}
+  </div>`;
+
+  // RATINGS
+  if(done&&has){
+    const circ=2*Math.PI*33;const dash=circ-(ov/5)*circ;
+    const stars=[1,2,3,4,5].map(i=>`<span class="oc-star ${i<=Math.round(ov)?'':'e'}">&#9733;</span>`).join('');
+    h+=`<div class="sec-hd"><span class="sec-dot"></span><span class="sec-title">Performance Rating</span></div>
+    <div class="overall-card">
+      <div class="oc-top">
+        <div class="ring-wrap">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle class="ring-bg" cx="44" cy="44" r="33"/>
+            <circle class="ring-fill" cx="44" cy="44" r="33" stroke="url(#rg)"
+              stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${circ.toFixed(1)}"
+              data-offset="${dash.toFixed(1)}" id="ringC"/>
+            <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/>
+            </linearGradient></defs>
+          </svg>
+          <div class="ring-center"><div class="ring-num">${ov.toFixed(1)}</div><div class="ring-denom">/ 5</div></div>
+        </div>
+        <div class="oc-right">
+          <div class="oc-stars">${stars}</div>
+          <div class="oc-grade" style="background:${g.bg};color:${g.cl};border:1px solid ${g.br}">${g.label}</div>
+          <div class="oc-desc">${g.desc}</div>
+        </div>
+      </div>
+      <div class="score-pills">${CATS.map(c=>{const v=parseFloat(p[c.key+'Rating'])||0;return`<div class="score-pill"><div class="pill-dot" style="background:${c.color}"></div>${c.label}<span class="pill-val" style="color:${c.color}">${v?v.toFixed(1):'–'}</span></div>`;}).join('')}</div>
+      <div class="sec-hd" style="margin-bottom:9px"><span class="sec-dot"></span><span class="sec-title" style="font-size:.8rem">Category Breakdown</span></div>
+      <div class="cat-grid">${CATS.map(c=>{const v=parseFloat(p[c.key+'Rating'])||0;const pct=Math.round(v/5*100);const st=[1,2,3,4,5].map(i=>`<span class="cat-star" style="color:${i<=Math.round(v)?c.color:'var(--bg3)'}">&#9733;</span>`).join('');return`<div class="cat-card"><div class="cat-header"><div class="cat-name">${c.label}</div><div class="cat-val" style="color:${c.color}">${v?v.toFixed(1):'–'}</div></div><div class="cat-stars">${st}</div><div class="cat-bar"><div class="cat-bar-fill" data-w="${pct}" style="background:linear-gradient(90deg,${c.color},${c.grad})"></div></div></div>`;}).join('')}</div>
+    </div>`;
+
+    // Motivation
+    const strong=CATS.reduce((b,c)=>(parseFloat(p[c.key+'Rating'])||0)>(parseFloat(p[b.key+'Rating'])||0)?c:b,CATS[0]);
+    const sv=(parseFloat(p[strong.key+'Rating'])||0).toFixed(1);
+    let mi,mt,mx;
+    if(ov>=4.5){mi='&#127942;';mt='Outstanding!';mx=`You scored <strong>${ov.toFixed(1)}/5</strong>. Your <strong>${strong.label}</strong> was exceptional at <strong>${sv}/5</strong>. You're setting a high standard — keep this momentum!`;}
+    else if(ov>=4){mi='&#127775;';mt='Great Work!';mx=`A solid <strong>${ov.toFixed(1)}/5</strong>! Your <strong>${strong.label}</strong> was your highlight at <strong>${sv}/5</strong>. A little more polish and you'll reach the top tier.`;}
+    else if(ov>=3){mi='&#128200;';mt='Good Progress!';mx=`You scored <strong>${ov.toFixed(1)}/5</strong> — a respectable start. Your <strong>${strong.label}</strong> showed real promise at <strong>${sv}/5</strong>. Consistent practice will push your scores higher.`;}
+    else{mi='&#128170;';mt='Keep Going!';mx=`You scored <strong>${ov.toFixed(1)}/5</strong>. Your <strong>${strong.label}</strong> was your strongest at <strong>${sv}/5</strong>. Read your AI feedback carefully and start practising today — every expert started exactly where you are.`;}
+    h+=`<div class="motive-card"><div class="motive-icon">${mi}</div><div class="motive-body"><div class="motive-title">${mt}</div><div class="motive-text">${mx}</div></div></div>`;
+  }
+
+  // TOPIC
+  const tNo=p.topicNo||s.topicNo||'';const tName=p.topicName||'';const tDate=p.speechDate||s.speechDate||'–';const tFac=p.faculty||'–';
+  if(done&&tNo){
+    h+=`<div class="topic-card"><div class="topic-icon">&#128221;</div><div class="topic-content"><div class="topic-label">Speech Topic Assigned</div><div class="topic-name">#${tNo} &mdash; ${tName||'–'}</div><div class="topic-meta">${tDate}${tFac!=='–'?' &nbsp;|&nbsp; '+tFac:''}</div></div></div>`;
+  }
+
+  // REMARKS
+  const rem=p.comments||s.comments||'';
+  if(done&&rem){
+    h+=`<div class="remarks-card"><div class="rem-header"><div class="rem-icon">&#128172;</div><div class="rem-label">Faculty Remarks</div></div><div class="rem-quote">${rem}</div><div class="rem-by"><div class="rem-dash"></div>${p.faculty||s.faculty||'Faculty'}</div></div>`;
+  }
+
+  // AI
+  if(done&&has){
+    h+=`<div class="sec-hd"><span class="sec-dot"></span><span class="sec-title"> Feedback</span></div>
+    <div class="ai-card">
+      <div class="ai-card-hd">
+        <div class="ai-hd-left"><div class="ai-icon">&#129302;</div><div><div class="ai-card-title">Personalised Speech Analysis</div><div class="ai-card-sub"></div></div></div>
+        <button class="ai-regen" onclick="refreshAI()">&#10024; Refresh</button>
+      </div>
+      <div class="ai-body"><div id="aiContent"><div class="ai-loading"><div class="ai-spinner"></div>Generating personalised analysis&hellip;</div></div></div>
+    </div>`;
+  }
+
+  // PENDING
+  if(!done){
+    h+=`<div class="empty-card"><span class="empty-icon">&#127908;</span><div class="empty-title">Ready for your speech?</div><div class="empty-sub">Your speech hasn't been assessed yet. Once your faculty evaluates you, results and AI feedback appear here.</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Wait for your turn</strong> — Faculty will call your roll number.</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Deliver your speech</strong> — Speak clearly and confidently within the time limit.</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>See your results</strong> — Ratings and AI feedback appear here automatically.</div></div>
+    </div></div>`;
+  }
+  if(done&&!has){
+    h+=`<div class="empty-card" style="padding:34px 22px"><span class="empty-icon">&#11088;</span><div class="empty-title">Rating Coming Soon</div><div class="empty-sub">Your speech was recorded. Faculty ratings will appear shortly — check back in a few minutes.</div></div>`;
+  }
+
+  // TIPS
+  let focusKey=null;
+  if(has){let low=99;CATS.forEach(c=>{const v=parseFloat(p[c.key+'Rating'])||0;if(v>0&&v<low){low=v;focusKey=c.key;}});}
+  const pool={
+    content:       {icon:'&#128218;',title:'Deep Research',      desc:'Collect 3 facts, 1 statistic and 1 real-world example before every speech. Strong content builds instant credibility.',tc:'var(--sky)',tb:'var(--sky-l)',tag:'Content'},
+    delivery:      {icon:'&#127908;',title:'Record & Review',    desc:'Record yourself for 2 minutes daily. Watch it back focusing on pace, volume and pronunciation. Improve one thing each session.',tc:'var(--sage)',tb:'var(--sage-l)',tag:'Delivery'},
+    confidence:    {icon:'&#129353;',title:'Mirror Practice',    desc:'Practise in front of a mirror, stand tall, maintain eye contact with yourself. Confidence is a learnable skill.',tc:'var(--coral)',tb:'var(--coral-l)',tag:'Confidence'},
+    vocabulary:    {icon:'&#128214;',title:'Word-a-Day',         desc:'Learn 5 new words every morning and use them in conversation that day. Precision in language builds authority.',tc:'var(--amber)',tb:'var(--amber-l)',tag:'Vocabulary'},
+    timeManagement:{icon:'&#9201;',  title:'Timed Run-throughs', desc:'Practise with a stopwatch. Target 120-150 words per minute. Know which sections to trim when you are running short.',tc:'var(--violet)',tb:'var(--violet-l)',tag:'Time Mgmt'},
+    g1:{icon:'&#129504;',title:'Manage Nerves',       desc:'4-7-8 breathing: inhale 4s, hold 7s, exhale 8s. Two rounds before you stand up. It genuinely works.',tc:'var(--sky)',tb:'var(--sky-l)',tag:'Mindset'},
+    g2:{icon:'&#128251;',title:'Study Great Speakers',desc:'Watch one TED Talk per week. Note their structure, pauses and how they open strong. Deliberately borrow what works.',tc:'var(--sage)',tb:'var(--sage-l)',tag:'Learning'},
+    g3:{icon:'&#9997;',  title:'Outline Every Time', desc:'Hook + thesis → 3 key points → strong conclusion. Always outline before you speak, even for a 2-minute talk.',tc:'var(--violet)',tb:'var(--violet-l)',tag:'Structure'},
+    g4:{icon:'&#129309;',title:'Engage Your Audience',desc:'Ask one rhetorical question, use one meaningful pause, make eye contact with different parts of the room.',tc:'var(--amber)',tb:'var(--amber-l)',tag:'Engagement'},
+  };
+  const ord=focusKey?[focusKey,'g1','g2','g3','g4']:['g1','g2','g3','g4'];
+  const tips=ord.slice(0,4).map(k=>pool[k]).filter(Boolean);
+  h+=`<div class="sec-hd"><span class="sec-dot"></span><span class="sec-title">Practice Tips</span></div>
+  <div class="tips-grid">${tips.map(t=>`<div class="tip-card"><div class="tip-icon">${t.icon}</div><div class="tip-title">${t.title}</div><div class="tip-desc">${t.desc}</div><div class="tip-tag" style="color:${t.tc};background:${t.tb}">${t.tag}</div></div>`).join('')}</div>`;
+
+  document.getElementById('mainContent').innerHTML=h;
+
+  // Show PDF buttons
+  if(done){
+    document.getElementById('fabPdf').style.display='grid';
+    const pb=document.getElementById('pdfBtn');if(pb)pb.style.display='flex';
+  }
+
+  // Animate
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.cat-bar-fill[data-w]').forEach(el=>{setTimeout(()=>{el.style.width=el.dataset.w+'%';},350);});
+    const ring=document.getElementById('ringC');
+    if(ring)setTimeout(()=>{ring.style.strokeDashoffset=ring.dataset.offset;},450);
+  });
+
+  if(done&&has)setTimeout(()=>genAI(),700);
+}
+
+async function genAI(){
+  const box=document.getElementById('aiContent');if(!box)return;
+  const p=PD||{},s=SD||{};const key=GROQ_KEY();
+  if(!key){box.innerHTML='<div style="color:var(--amber);font-size:.8rem;padding:6px 0">&#10024; AI analysis is not enabled for your institution yet. Ask your administrator to configure the Groq API key.</div>';return;}
+  const ov=parseFloat(p.overallRating)||0;const g=getGrade(ov);
+  const catStr=CATS.map(c=>`${c.label}: ${(parseFloat(p[c.key+'Rating'])||0).toFixed(1)}/5`).join(' | ');
+  const sorted=[...CATS].sort((a,b)=>(parseFloat(p[b.key+'Rating'])||0)-(parseFloat(p[a.key+'Rating'])||0));
+  const strong=sorted[0];
+  const weak=[...CATS].filter(c=>parseFloat(p[c.key+'Rating'])>0).sort((a,b)=>(parseFloat(p[a.key+'Rating'])||99)-(parseFloat(p[b.key+'Rating'])||99))[0]||CATS[4];
+  const prompt=`You are a warm, expert speech coach. Give personalised, encouraging feedback using the student's ACTUAL scores — be specific, never generic.
+
+STUDENT: ${s.name||ROLL} | Year ${s.year||'–'}, Section ${s.section||'–'}
+TOPIC: #${p.topicNo||'–'} "${p.topicName||'–'}"
+RATINGS: ${catStr}
+OVERALL: ${ov.toFixed(1)}/5 (${g.label.trim()})
+STRONGEST: ${strong.label} (${(parseFloat(p[strong.key+'Rating'])||0).toFixed(1)}/5)
+WEAKEST: ${weak.label} (${(parseFloat(p[weak.key+'Rating'])||0).toFixed(1)}/5)
+FACULTY REMARKS: "${p.comments||s.comments||'None'}"
+
+Write using EXACTLY these headers:
+
+## Overall Assessment
+2-3 sentences. Mention their specific grade and what it means.
+
+## What You Did Well
+3 specific strengths referencing actual scores. Be genuine and specific.
+
+## Areas to Strengthen
+3 improvement areas from lowest scores. One practical exercise each.
+
+## Your 2-Week Action Plan
+Week 1 — 3 daily exercises (10 min each):
+Week 2 — 3 escalating challenges:
+
+## A Message for You
+2-3 sentences directly to the student using their first name. Reference their topic and specific score. End positively.
+
+Keep total under 500 words. Reference actual numbers throughout.`;
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:900,temperature:0.72})});
+    if(!res.ok){const t=await res.text().catch(()=>'');let m='Error '+res.status;try{m=JSON.parse(t)?.error?.message||m;}catch(e){}throw new Error(m.slice(0,120));}
+    const d=await res.json();const text=d.choices?.[0]?.message?.content||'Unable to generate.';
+    AI_TEXT=text;
+    box.innerHTML='<div class="ai-content">'+text.replace(/## (.+)/g,'</div><div class="ai-shd">$1</div><div class="ai-content">').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')+'</div>';
+  }catch(e){box.innerHTML=`<div style="color:var(--coral);font-size:.8rem">&#9888; Could not load AI analysis: ${e.message}</div>`;}
+}
+
+async function refreshAI(){AI_TEXT='';const box=document.getElementById('aiContent');if(box)box.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div>Regenerating&hellip;</div>';await genAI();}
+
+function downloadPDF(){
+  const s=SD||{},p=PD||{};const ov=parseFloat(p.overallRating)||0;const g=getGrade(ov);const now=new Date();
+  const catRows=CATS.map(c=>{const v=parseFloat(p[c.key+'Rating'])||0;const pct=Math.round(v/5*100);const stars='★'.repeat(Math.round(v))+'☆'.repeat(5-Math.round(v));const bc=v>=4?'#059669':v>=3?'#2563eb':v>=2?'#d97706':'#e5470a';
+    return`<tr><td style="padding:9px 14px;border-bottom:1px solid #eee;font-weight:600;color:#374151">${c.label}</td><td style="padding:9px 14px;border-bottom:1px solid #eee;font-family:monospace;color:${bc};font-size:15px;letter-spacing:2px">${stars}</td><td style="padding:9px 14px;border-bottom:1px solid #eee;font-family:monospace;font-weight:700;color:${bc}">${v?v.toFixed(1)+'/5':'–'}</td><td style="padding:9px 14px;border-bottom:1px solid #eee"><div style="background:#eee;border-radius:4px;height:8px;width:120px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${bc};border-radius:4px"></div></div></td></tr>`;
+  }).join('');
+  const aiSec=AI_TEXT?`<div style="margin-top:28px"><h2 style="font-size:13px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.12em;border-bottom:2px solid #ede9fe;padding-bottom:7px;margin-bottom:14px">AI-Powered Feedback</h2><div style="font-size:12px;line-height:1.8;color:#374151;background:#faf5ff;border-left:3px solid #7c3aed;border-radius:0 10px 10px 0;padding:14px 18px">${AI_TEXT.replace(/## (.+)/g,'<strong style="color:#7c3aed;display:block;margin-top:12px;margin-bottom:4px">$1</strong>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div></div>`:'';
+  const remSec=(p.comments||s.comments)?`<div style="margin-top:20px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:0 10px 10px 0;padding:12px 16px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#d97706;margin-bottom:6px">Faculty Remarks</div><div style="font-size:12px;color:#374151;font-style:italic;line-height:1.7">"${p.comments||s.comments}"</div><div style="font-size:11px;color:#9ca3af;margin-top:6px">&mdash; ${p.faculty||'Faculty'}</div></div>`:'';
+  const w=window.open('','_blank','width=820,height=920');
+  w.document.write(`<!DOCTYPE html><html><head><title>Speech Report — ${ROLL}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#111827}
+  .hdr{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;padding:28px 36px}
+  .body{padding:28px 36px;max-width:760px;margin:0 auto}
+  table{width:100%;border-collapse:collapse}
+  .pb{background:#2563eb;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-right:8px}
+  .np{margin-bottom:14px;text-align:right}
+  @media print{.np{display:none}}</style></head><body>
+  <div class="hdr">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.7;margin-bottom:6px">Extempore Speech Assessment Portal</div>
+    <div style="font-size:24px;font-weight:800;margin-bottom:4px">${s.name||ROLL}</div>
+    <div style="font-size:12px;opacity:.8;display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
+      <span>Roll No: ${ROLL}</span><span>Year ${s.year||'–'}</span><span>Section ${s.section||'–'}</span>
+      <span>Generated: ${now.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</span>
+    </div>
+  </div>
+  <div class="body">
+    <div class="np"><button class="pb" onclick="window.print()">&#128196; Print / Save PDF</button><button style="background:#f3f4f6;border:1px solid #e5e7eb;padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer" onclick="window.close()">&#10005; Close</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+      <div style="background:${g.bg};border:1.5px solid ${g.br};border-radius:14px;padding:16px;text-align:center">
+        <div style="font-size:38px;font-weight:800;font-family:monospace;color:${g.cl};line-height:1">${ov.toFixed(1)}</div>
+        <div style="font-size:10px;color:#6b7280;margin-top:3px">OVERALL / 5.0</div>
+        <div style="font-size:12px;font-weight:700;color:${g.cl};margin-top:6px;padding:3px 10px;background:${g.bg};border-radius:20px;display:inline-block">${g.label.trim()}</div>
+      </div>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#6b7280;margin-bottom:8px">Speech Details</div>
+        <div style="font-size:12px;color:#374151;line-height:1.85">
+          <div><strong>Topic:</strong> #${p.topicNo||s.topicNo||'–'} ${p.topicName||'–'}</div>
+          <div><strong>Date:</strong> ${p.speechDate||s.speechDate||'–'}</div>
+          <div><strong>Faculty:</strong> ${p.faculty||'–'}</div>
+          <div><strong>Status:</strong> <span style="color:#059669;font-weight:700">${s.status||'–'}</span></div>
+        </div>
+      </div>
+    </div>
+    <h2 style="font-size:13px;font-weight:800;color:#1f2937;text-transform:uppercase;letter-spacing:.12em;border-bottom:2px solid #e5e7eb;padding-bottom:7px;margin-bottom:12px">Category Ratings</h2>
+    <table><thead><tr style="background:#f9fafb">
+      <th style="padding:9px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Category</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Stars</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Score</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.08em">Visual</th>
+    </tr></thead><tbody>${catRows}</tbody></table>
+    ${remSec}${aiSec}
+    <div style="text-align:center;margin-top:32px;padding-top:14px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af">
+      Extempore Speech Assessment Portal &middot; ${now.toLocaleString('en-IN')} &middot; ${ROLL}
+    </div>
+  </div></body></html>`);
+  w.document.close();
+  toast('PDF report opened — use Print to save as PDF','success');
+}
+
+function notFound(msg){return`<div class="empty-card" style="margin-top:20px"><span class="empty-icon">&#128269;</span><div class="empty-title">Student Not Found</div><div class="empty-sub">No record found for <strong>${ROLL}</strong>. Verify your roll number or contact faculty.${msg?`<br><small style="opacity:.5;margin-top:4px;display:block">${msg}</small>`:''}</div><button onclick="logout()" style="margin-top:18px;background:var(--sky-l);border:1.5px solid var(--sky-m);color:var(--sky);border-radius:12px;padding:10px 22px;font-family:var(--fd);font-size:.78rem;font-weight:700;cursor:pointer">&#8592; Back to Login</button></div>`;}
+function logout(){sessionStorage.clear();window.location.href='index.html';}
+
+init();
+</script>
+</body>
+</html>

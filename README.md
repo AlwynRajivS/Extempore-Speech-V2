@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="assets/demo.gif" width="90%">
+  <br><br>
+  <em>🎬 AI-Powered Speech Assessment — Full Workflow Demo</em>
+</p>
 # 🎤 Extempore — Speech Assessment Portal
 
 > 🚀 A modern, AI-powered platform to evaluate, analyze, and enhance student speaking skills through structured extempore sessions.

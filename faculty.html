@@ -962,6 +962,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .action-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surf);border:1px solid var(--bdr2);border-radius:20px;padding:7px 14px;font-size:.7rem;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;font-family:var(--fd);white-space:nowrap;box-shadow:var(--sh1)}
 .action-pill:hover,.action-pill:active{background:var(--sky-l);border-color:var(--sky-m);color:var(--sky);transform:translateY(-1px);box-shadow:var(--sh2)}
 .action-pill-icon{font-size:13px}
+
+
+
 </style>
 </head>
 <body>
@@ -1230,13 +1233,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
             <div class="strip-stat"><div class="strip-num" id="qs-avg" style="color:var(--amber)">—</div><div class="strip-lbl">Avg ★</div></div>
           </div>
 
-          <!-- Quick Action Pills (NEW) -->
+          <!-- Quick Action Pills (NEW) 
           <div class="action-pills">
             <div class="action-pill" onclick="openAddTopicModal()"><span class="action-pill-icon">&#10133;</span>Add Topic</div>
             <div class="action-pill" onclick="openGaming()"><span class="action-pill-icon">&#127918;</span>Gaming Mode</div>
             <div class="action-pill" onclick="openFsTimer()"><span class="action-pill-icon">&#9974;</span>Fullscreen Timer</div>
             <div class="action-pill" onclick="shuffleQueue()"><span class="action-pill-icon">&#128256;</span>Shuffle Queue</div>
-          </div>
+          </div>-->
 
           <!-- Date Bar -->
           <div class="date-bar">
@@ -2635,6 +2638,8 @@ async function submitRatingModal(){
     loadAll();
   }catch(e){toast('Error: '+e.message,'error');btn.innerHTML=orig;btn.disabled=false;}
 }
+
+
 </script>
 </body>
 </html>

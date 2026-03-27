@@ -1068,24 +1068,24 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <!-- ─── BOTTOM NAV (mobile) ─── -->
 <nav class="bottom-nav" id="bottomNav">
   <div class="bn-item active" id="bn-session" onclick="bnNav('session',this)">
-    <div class="bn-icon">&#127921;</div>
+    <div class="bn-icon">🎯</div>
     <div class="bn-label">Session</div>
     <div class="bn-badge" id="bnBadge" style="display:none">0</div>
   </div>
   <div class="bn-item" id="bn-students" onclick="bnNav('students',this)">
-    <div class="bn-icon">&#128101;</div>
+    <div class="bn-icon">👥</div>
     <div class="bn-label">Students</div>
   </div>
+  <div class="bn-item" id="bn-topics" onclick="bnNav('topics',this)">
+    <div class="bn-icon">📋</div>
+    <div class="bn-label">Topics</div>
+  </div>
   <div class="bn-item" id="bn-overview" onclick="bnNav('overview',this)">
-    <div class="bn-icon">&#128202;</div>
+    <div class="bn-icon">📊</div>
     <div class="bn-label">Overview</div>
   </div>
-  <div class="bn-item" id="bn-leaderboard" onclick="bnNav('leaderboard',this)">
-    <div class="bn-icon">&#127942;</div>
-    <div class="bn-label">Ranks</div>
-  </div>
   <div class="bn-item" id="bn-menu" onclick="toggleSidebar()">
-    <div class="bn-icon">&#9776;</div>
+    <div class="bn-icon">☰</div>
     <div class="bn-label">More</div>
   </div>
 </nav>
@@ -1119,6 +1119,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="mnav-item-icon">&#128101;</div>
       <div class="mnav-item-label">Students</div>
     </div>
+    <div class="mnav-item" id="mni-topics" onclick="goTo('topics',null);closeSidebar()">
+  <div class="mnav-item-icon">📋</div>
+  <div class="mnav-item-label">Topics</div>
+</div>
     <div class="mnav-item" id="mni-attendance" onclick="goTo('attendance',null);closeSidebar()">
       <div class="mnav-item-icon">&#129001;</div>
       <div class="mnav-item-label">Grid</div>
@@ -1172,6 +1176,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="sb-section">Analytics</div>
       <div class="sb-link" onclick="goTo('analytics',this)"><span class="sb-icon">&#128200;</span>Class Analytics</div>
       <div class="sb-link" onclick="goTo('leaderboard',this)"><span class="sb-icon">&#127942;</span>Leaderboard</div>
+      <!-- ADD after the leaderboard sb-link, before Reports section -->
+<div class="sb-link" onclick="goTo('topics',this)"><span class="sb-icon">📋</span>Topics</div>
       <div class="sb-link" onclick="goTo('ai-feedback',this)"><span class="sb-icon">&#129302;</span>AI Insights</div>
       <div class="sb-section">Reports</div>
       <div class="sb-link" onclick="goTo('reports',this)"><span class="sb-icon">&#128196;</span>Report Generator</div>
@@ -1475,6 +1481,23 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
           </div>
         </div>
 
+        <!-- ══ PAGE: TOPICS ══ -->
+<div class="page" id="page-topics">
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title">📋 Topics — Date Wise</span>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <span id="topicsPageMeta" style="font-family:var(--fm);font-size:.63rem;color:var(--muted)">—</span>
+        <button class="btn btn-amber" style="padding:5px 10px;font-size:.68rem" onclick="openAddTopicModal()">＋ Add Topic</button>
+        <button class="btn btn-ghost" style="padding:5px 8px" onclick="refreshTopicsPage()">🔄</button>
+      </div>
+    </div>
+    <div style="max-height:70vh;overflow-y:auto" id="topicsPageList">
+      <div style="padding:16px;color:var(--muted);font-size:.75rem">Load a class to see topics.</div>
+    </div>
+  </div>
+</div>
+
         <!-- ══ PAGE: ANALYTICS ══ -->
         <div class="page" id="page-analytics">
           <div class="g4">
@@ -1553,7 +1576,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
    + Enhanced 3D wheel drawWheel()
    + Mobile sidebar fixed
 ====================================================== */
-const GAS_URL="https://script.google.com/macros/s/AKfycbzXexjCE8BAoY2CTISQJV2R_Rfzx6ncySFsX-O3e3upfCA7DqGgJAbE8o3y9hZnPcsqJw/exec";
+const GAS_URL="https://script.google.com/macros/s/AKfycbwmKwOXRYruGxwNPUZBoUZQKOZ-v9Z6aSM3wYkhwgsav3pO4xWidIKsy2VRn8syFU0ZRQ/exec";
 const GROQ_KEY=()=>localStorage.getItem('ep_groq_key')||'';
 const CATEGORIES=[
   {key:'content',label:'Content Quality',desc:'Relevance, depth, structure'},
@@ -1632,17 +1655,42 @@ function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 function onDateChange(){sessionDate=document.getElementById('sessionDate').value||todayISO();updateDateLabels();filterTopicsByDate();}
 function updateDateLabels(){const d=new Date(sessionDate+'T00:00:00');document.getElementById('topicDateLabel').textContent=d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});}
 
+/* FIX: filterTopicsByDate — match topicNo AND topicDate to determine "used" */
 function filterTopicsByDate(){
-  const todaysTopics=allTopics.filter(t=>t.topicDate&&t.topicDate===sessionDate);
-  const usedByThisClass=new Set(sessionLogs.filter(l=>String(l.year||'').trim()===String(currentYear).trim()&&String(l.section||'').trim()===String(currentSection).trim()).map(l=>String(l.topicNo)));
-  filteredTopics=todaysTopics.filter(t=>!usedByThisClass.has(String(t.topicNo)));
-  const total=todaysTopics.length,avail=filteredTopics.length,used=total-avail;
-  document.getElementById('topicCountBadge').textContent=avail+' available'+(used>0?' ('+used+' used)':'');
-  const nm=document.getElementById('noTopicMsg');
-  if(nm){nm.style.display=filteredTopics.length?'none':'block';nm.textContent=filteredTopics.length===0&&todaysTopics.length>0?'All '+todaysTopics.length+' topic(s) used. Add more topics.':'No topics for this date. Click + Add Topic.';}
-  pickedTopic=null;document.getElementById('topicResult').style.display='none';
-  updateConfirmPreview();renderWheels();
-  if(document.getElementById('gamingOverlay').classList.contains('open'))redrawGmWheels();
+  const todaysTopics = allTopics.filter(t => t.topicDate && t.topicDate === sessionDate);
+
+  // Use only topicNo scoped to this class — topicDate unreliable in logs
+  const usedTopicNosToday = new Set(
+    sessionLogs
+      .filter(l =>
+        String(l.year||'').trim() === String(currentYear).trim() &&
+        String(l.section||'').trim() === String(currentSection).trim() &&
+        String(l.topicDate||'').trim() === String(sessionDate).trim()
+      )
+      .map(l => String(l.topicNo||'').trim())
+  );
+
+  filteredTopics = todaysTopics.filter(t =>
+    !usedTopicNosToday.has(String(t.topicNo||'').trim())
+  );
+
+  const total = todaysTopics.length, avail = filteredTopics.length, used = total - avail;
+  document.getElementById('topicCountBadge').textContent =
+    avail + ' available' + (used > 0 ? ' (' + used + ' used)' : '');
+
+  const nm = document.getElementById('noTopicMsg');
+  if(nm){
+    nm.style.display = filteredTopics.length ? 'none' : 'block';
+    nm.textContent = filteredTopics.length===0 && todaysTopics.length>0
+      ? 'All '+todaysTopics.length+' topic(s) used. Add more topics.'
+      : 'No topics for this date. Click + Add Topic.';
+  }
+
+  pickedTopic = null;
+  document.getElementById('topicResult').style.display = 'none';
+  updateConfirmPreview();
+  renderWheels();
+  if(document.getElementById('gamingOverlay').classList.contains('open')) redrawGmWheels();
 }
 function getCurrentClass(){const v=cf.value;if(!v)return{year:'',section:''};const[y,s]=v.split('|');return{year:y,section:s};}
 function onClassChange(){const{year,section}=getCurrentClass();currentYear=year;currentSection=section;if(!currentYear&&!currentSection)return;loadAll();}
@@ -1682,17 +1730,17 @@ function goTo(name,el){
   const page=document.getElementById('page-'+name);if(page)page.classList.add('active');
   if(el)el.classList.add('active');
   else{document.querySelectorAll('.sb-link').forEach(l=>{if(l.getAttribute('onclick')&&l.getAttribute('onclick').includes("'"+name+"'"))l.classList.add('active');});}
-  const titles={session:'Live Session',overview:'Overview',students:'My Students',attendance:'Completion Grid',analytics:'Class Analytics',leaderboard:'Leaderboard','ai-feedback':'AI Insights',reports:'Report Generator'};
+  const titles={session:'Live Session',overview:'Overview',students:'My Students',attendance:'Completion Grid',analytics:'Class Analytics',leaderboard:'Leaderboard','ai-feedback':'AI Insights',reports:'Report Generator',topics:'Topics'};
   document.getElementById('pageTitle').textContent=titles[name]||name;
   closeSidebar();
   // sync bottom nav
-  const bnMap={session:'bn-session',overview:'bn-overview',students:'bn-students',leaderboard:'bn-leaderboard'};
+  const bnMap={session:'bn-session',overview:'bn-overview',students:'bn-students',leaderboard:'bn-leaderboard',topics:'bn-topics'};
   document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
   if(bnMap[name]){const bnEl=document.getElementById(bnMap[name]);if(bnEl)bnEl.classList.add('active');}
   // sync mobile nav panel
   document.querySelectorAll('.mnav-item').forEach(m=>m.classList.remove('active'));
   const mni=document.getElementById('mni-'+name);if(mni)mni.classList.add('active');
-  const map={analytics:loadAnalyticsPage,students:loadStudents,overview:loadOverview,reports:loadReportStats,'ai-feedback':populateAiStudentSel,session:()=>{renderWheels();renderQueue();},leaderboard:loadLeaderboard,attendance:loadAttendance};
+  const map={analytics:loadAnalyticsPage,students:loadStudents,overview:loadOverview,reports:loadReportStats,'ai-feedback':populateAiStudentSel,session:()=>{renderWheels();renderQueue();},leaderboard:loadLeaderboard,attendance:loadAttendance,topics:refreshTopicsPage};
   if(map[name])map[name]();
 }
 
@@ -2484,21 +2532,96 @@ function renderStudentsView(list){
 
 /* ── 8. TOPIC HISTORY ── */
 function buildTopicHistory(){
-  const el=document.getElementById('topicHistList'),meta=document.getElementById('topicHistMeta');
-  if(!el)return;
-  if(!allTopics.length){el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:.75rem">No topics loaded.</div>';if(meta)meta.textContent='—';return;}
-  const usedNos=new Set(sessionLogs.map(l=>String(l.topicNo)));
-  const used=allTopics.filter(t=>usedNos.has(String(t.topicNo))).length;
-  if(meta)meta.textContent=used+' used / '+allTopics.length+' total';
-  el.innerHTML=allTopics.map(t=>{
-    const isUsed=usedNos.has(String(t.topicNo));
-    return '<div class="thi-row">'+
-      '<div class="thi-num">#'+t.topicNo+'</div>'+
-      '<div class="thi-name">'+(t.topicName||'—')+'</div>'+
-      (t.topicDate?'<div class="thi-date">'+fmtDateShort(t.topicDate)+'</div>':'')+
-      '<div class="'+(isUsed?'thi-used':'thi-pend')+'">'+(isUsed?'&#9989; Used':'&#9203; Pending')+'</div>'+
-      '</div>';
-  }).join('');
+  const el = document.getElementById('topicHistList');
+  const meta = document.getElementById('topicHistMeta');
+  if(!el) return;
+
+  if(!allTopics.length){
+    el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:.75rem">No topics loaded.</div>';
+    if(meta) meta.textContent='—';
+    return;
+  }
+
+  // Group logs by topicDate → topicNo for accurate per-date matching
+  const usedByDate = {};
+  sessionLogs.forEach(l => {
+    const date = String(l.topicDate||'').trim();
+    const no = String(l.topicNo||'').trim();
+    if(!date || !no) return;
+    if(!usedByDate[date]) usedByDate[date] = new Set();
+    usedByDate[date].add(no);
+  });
+
+  function isTopicUsed(t){
+    const date = String(t.topicDate||'').trim();
+    const no = String(t.topicNo||'').trim();
+    return usedByDate[date] ? usedByDate[date].has(no) : false;
+  }
+
+  const usedCount = allTopics.filter(t=>isTopicUsed(t)).length;
+  if(meta) meta.textContent = usedCount+' used / '+allTopics.length+' total';
+
+  const byDate={};
+  allTopics.forEach(t=>{
+    const d=t.topicDate||'No Date';
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(t);
+  });
+
+  const sortedDates=Object.keys(byDate).sort((a,b)=>{
+    if(a==='No Date')return 1;
+    if(b==='No Date')return -1;
+    return b.localeCompare(a);
+  });
+
+  let html='';
+  sortedDates.forEach(date=>{
+    const topics=byDate[date];
+    const usedInDate=topics.filter(t=>isTopicUsed(t)).length;
+    const pendingInDate=topics.length-usedInDate;
+    const isToday=date===sessionDate;
+    const displayDate=date==='No Date'?'No Date':
+      new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+    html+=`<div style="
+      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+      padding:9px 14px;
+      background:${isToday?'var(--amber-l)':'var(--bg3)'};
+      border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);
+      position:sticky;top:0;z-index:2;">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span style="font-size:.72rem;font-weight:800;color:${isToday?'var(--amber)':'var(--ink2)'};font-family:var(--fd)">
+            ${isToday?'📅 ':'📆 '}${displayDate}
+          </span>
+          ${isToday?'<span style="background:var(--amber);color:#fff;font-size:.48rem;font-weight:700;padding:2px 7px;border-radius:20px;font-family:var(--fm)">TODAY</span>':''}
+        </div>
+        <div style="display:flex;gap:5px">
+          <span style="background:var(--sage-l);border:1px solid var(--sage-m);color:var(--sage);font-size:.55rem;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--fm)">${usedInDate} used</span>
+          <span style="background:var(--coral-l);border:1px solid var(--coral-m);color:var(--coral);font-size:.55rem;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--fm)">${pendingInDate} pending</span>
+        </div>
+    </div>`;
+
+    topics.forEach(t=>{
+      const used=isTopicUsed(t);
+      const date=String(t.topicDate||'').trim();
+      const no=String(t.topicNo||'').trim();
+      const logEntry=sessionLogs.find(l=>
+        String(l.topicNo||'').trim()===no &&
+        String(l.topicDate||'').trim()===date
+      );
+      html+=`<div class="thi-row" style="padding-left:22px">
+        <div class="thi-num">#${t.topicNo}</div>
+        <div class="thi-name">${t.topicName||'—'}</div>
+        ${used&&logEntry
+          ?`<div style="font-family:var(--fm);font-size:.58rem;color:var(--muted);flex-shrink:0">👤 ${logEntry.name||logEntry.rollNo||''}</div>`
+          :'<div></div>'
+        }
+        <div class="${used?'thi-used':'thi-pend'}">${used?'✅ Used':'⏳ Pending'}</div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML=html;
 }
 
 /* ════════════════════════════════════════════
@@ -2510,6 +2633,7 @@ function buildTopicHistory(){
 function loadStudents(){
   renderStudentsView(allStudents);
   buildTopicHistory();
+refreshTopicsPage();
 }
 
 /* filterStudents */
@@ -2593,6 +2717,7 @@ async function loadAll(){
     buildGradeDist(ratings);
     buildRatingRadar();
     buildTopicHistory();
+refreshTopicsPage();
     renderStudentsView(allStudents);
     if(!activityLog.length&&allStudents.length>0){
       addActivity('\u{1F4D6}','Loaded: Year '+currentYear+' Sec '+currentSection+' \u00B7 '+allStudents.length+' students','#2563eb');
@@ -2611,14 +2736,40 @@ async function submitRatingModal(){
   const snapStudent=pickedStudent?{...pickedStudent}:null;
   const snapTopic=pickedTopic?{...pickedTopic}:null;
   try{
-    const payload={rollNo:pickedStudent.rollNo,topicNo:pickedTopic.topicNo,topicName:pickedTopic.topicName,topicDate:pickedTopic.topicDate||'',rowIndex:pickedTopic.rowIndex||'',comments:remarks,faculty:FAC_NAME,year:currentYear,section:currentSection,overallRating:avg};
+    const payload={
+      rollNo:pickedStudent.rollNo,
+      topicNo:String(pickedTopic.topicNo||''),
+      topicName:pickedTopic.topicName||'',
+      topicDate:String(pickedTopic.topicDate||''),
+      rowIndex:pickedTopic.rowIndex||'',
+      comments:remarks,
+      faculty:FAC_NAME,
+      year:currentYear,
+      section:currentSection,
+      overallRating:avg
+    };
     CATEGORIES.forEach(c=>{payload[c.key+'Rating']=currentRatings[c.key];});
     await api('confirmPick',payload);
-    toast(pickedStudent.rollNo+' \u2014 Overall '+avg+'\u2605','success');
+    toast(pickedStudent.rollNo+' — Overall '+avg+'★','success');
     if(parseFloat(avg)>=4)spawnConfetti();
     closeModal();
-    allStudents=allStudents.map(s=>s.rollNo===pickedStudent.rollNo?{...s,status:'Completed',topicNo:pickedTopic.topicNo,speechDate:new Date().toLocaleDateString('en-IN')}:s);
-    const logEntry={rollNo:pickedStudent.rollNo,name:pickedStudent.name,topicNo:pickedTopic.topicNo,topicName:pickedTopic.topicName,overallRating:avg,comments:remarks,faculty:FAC_NAME,speechDate:new Date().toLocaleDateString('en-IN'),year:currentYear,section:currentSection};
+    allStudents=allStudents.map(s=>s.rollNo===pickedStudent.rollNo
+      ?{...s,status:'Completed',topicNo:String(pickedTopic.topicNo||''),speechDate:new Date().toLocaleDateString('en-IN')}
+      :s
+    );
+    const logEntry={
+      rollNo:pickedStudent.rollNo,
+      name:pickedStudent.name,
+      topicNo:String(pickedTopic.topicNo||''),
+      topicName:pickedTopic.topicName||'',
+      topicDate:String(pickedTopic.topicDate||''),
+      overallRating:avg,
+      comments:remarks,
+      faculty:FAC_NAME,
+      speechDate:new Date().toLocaleDateString('en-IN'),
+      year:currentYear,
+      section:currentSection
+    };
     CATEGORIES.forEach(c=>{logEntry[c.key+'Rating']=currentRatings[c.key];});
     sessionLogs.unshift(logEntry);
     pickedStudent=null;pickedTopic=null;gmPickedStudent=null;gmPickedTopic=null;
@@ -2627,11 +2778,13 @@ async function submitRatingModal(){
     updatePendingBadge();filterTopicsByDate();renderWheels();updateQuickStats();renderQueue();
     if(document.getElementById('gamingOverlay').classList.contains('open')){
       redrawGmWheels();document.getElementById('gmRateBtn').disabled=true;
-      document.getElementById('gmStudentResult').className='gm-result-box';document.getElementById('gmStudentResult').innerHTML='<div style="color:rgba(255,255,255,.3);font-size:.72rem">Spin to pick a student</div>';
-      document.getElementById('gmTopicResult').className='gm-result-box';document.getElementById('gmTopicResult').innerHTML='<div style="color:rgba(255,255,255,.3);font-size:.72rem">Spin to pick a topic</div>';
+      document.getElementById('gmStudentResult').className='gm-result-box';
+      document.getElementById('gmStudentResult').innerHTML='<div style="color:rgba(255,255,255,.3);font-size:.72rem">Spin to pick a student</div>';
+      document.getElementById('gmTopicResult').className='gm-result-box';
+      document.getElementById('gmTopicResult').innerHTML='<div style="color:rgba(255,255,255,.3);font-size:.72rem">Spin to pick a topic</div>';
     }
     if(snapStudent){
-      addActivity('\u2B50',(snapStudent.name||snapStudent.rollNo)+' rated '+avg+'\u2605'+(snapTopic?' \u2014 '+snapTopic.topicName.substring(0,28):''),'#0d9f5a');
+      addActivity('⭐',(snapStudent.name||snapStudent.rollNo)+' rated '+avg+'★'+(snapTopic?' — '+snapTopic.topicName.substring(0,28):''),'#0d9f5a');
     }
     updateSpeechCounter();
     updateMilestones();
@@ -2639,7 +2792,193 @@ async function submitRatingModal(){
   }catch(e){toast('Error: '+e.message,'error');btn.innerHTML=orig;btn.disabled=false;}
 }
 
+/* NEW: buildTopicHistory — grouped by date with used/pending per date */
+function buildTopicHistory(){
+  const el = document.getElementById('topicHistList');
+  const meta = document.getElementById('topicHistMeta');
+  if(!el) return;
 
+  if(!allTopics.length){
+    el.innerHTML='<div style="padding:14px;color:var(--muted);font-size:.75rem">No topics loaded.</div>';
+    if(meta) meta.textContent='—';
+    return;
+  }
+
+  const usedKeys = new Set(
+    sessionLogs.map(l => String(l.topicNo||'').trim()+'|'+String(l.topicDate||'').trim())
+  );
+
+  function isTopicUsed(t){
+    return usedKeys.has(String(t.topicNo||'').trim()+'|'+String(t.topicDate||'').trim());
+  }
+
+  const usedCount = allTopics.filter(t=>isTopicUsed(t)).length;
+  if(meta) meta.textContent = usedCount+' used / '+allTopics.length+' total';
+
+  const byDate={};
+  allTopics.forEach(t=>{
+    const d=t.topicDate||'No Date';
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(t);
+  });
+
+  const sortedDates=Object.keys(byDate).sort((a,b)=>{
+    if(a==='No Date')return 1;
+    if(b==='No Date')return -1;
+    return b.localeCompare(a);
+  });
+
+  let html='';
+  sortedDates.forEach(date=>{
+    const topics=byDate[date];
+    const usedInDate=topics.filter(t=>isTopicUsed(t)).length;
+    const pendingInDate=topics.length-usedInDate;
+    const isToday=date===sessionDate;
+    const displayDate=date==='No Date'?'No Date':
+      new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+    html+=`<div style="
+      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+      padding:9px 14px;
+      background:${isToday?'var(--amber-l)':'var(--bg3)'};
+      border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);
+      position:sticky;top:0;z-index:2;">
+        <div style="display:flex;align-items:center;gap:7px">
+          <span style="font-size:.72rem;font-weight:800;color:${isToday?'var(--amber)':'var(--ink2)'};font-family:var(--fd)">
+            ${isToday?'📅 ':'📆 '}${displayDate}
+          </span>
+          ${isToday?'<span style="background:var(--amber);color:#fff;font-size:.48rem;font-weight:700;padding:2px 7px;border-radius:20px;font-family:var(--fm)">TODAY</span>':''}
+        </div>
+        <div style="display:flex;gap:5px">
+          <span style="background:var(--sage-l);border:1px solid var(--sage-m);color:var(--sage);font-size:.55rem;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--fm)">${usedInDate} used</span>
+          <span style="background:var(--coral-l);border:1px solid var(--coral-m);color:var(--coral);font-size:.55rem;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--fm)">${pendingInDate} pending</span>
+        </div>
+    </div>`;
+
+    topics.forEach(t=>{
+      const used=isTopicUsed(t);
+      const logEntry=sessionLogs.find(l=>
+        String(l.topicNo||'').trim()===String(t.topicNo||'').trim() &&
+        String(l.topicDate||'').trim()===String(t.topicDate||'').trim()
+      );
+      html+=`<div class="thi-row" style="padding-left:22px">
+        <div class="thi-num">#${t.topicNo}</div>
+        <div class="thi-name">${t.topicName||'—'}</div>
+        ${used&&logEntry
+          ?`<div style="font-family:var(--fm);font-size:.58rem;color:var(--muted);flex-shrink:0">👤 ${logEntry.name||logEntry.rollNo||''}</div>`
+          :'<div></div>'
+        }
+        <div class="${used?'thi-used':'thi-pend'}">${used?'✅ Used':'⏳ Pending'}</div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML=html;
+}
+function refreshTopicsPage(){
+  const el=document.getElementById('topicsPageList');
+  const meta=document.getElementById('topicsPageMeta');
+  if(!el)return;
+
+  if(!allTopics.length){
+    el.innerHTML='<div style="padding:16px;color:var(--muted);font-size:.75rem">Load a class first.</div>';
+    if(meta)meta.textContent='—';
+    return;
+  }
+
+  // Group logs by topicDate → topicNo for accurate per-date matching
+  const usedByDate = {};
+  sessionLogs.forEach(l => {
+    const date = String(l.topicDate||'').trim();
+    const no = String(l.topicNo||'').trim();
+    if(!date || !no) return;
+    if(!usedByDate[date]) usedByDate[date] = new Set();
+    usedByDate[date].add(no);
+  });
+
+  function isUsed(t){
+    const date = String(t.topicDate||'').trim();
+    const no = String(t.topicNo||'').trim();
+    return usedByDate[date] ? usedByDate[date].has(no) : false;
+  }
+
+  const usedCount=allTopics.filter(t=>isUsed(t)).length;
+  if(meta)meta.textContent=usedCount+' used / '+allTopics.length+' total';
+
+  const byDate={};
+  allTopics.forEach(t=>{
+    const d=t.topicDate||'No Date';
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(t);
+  });
+
+  const sortedDates=Object.keys(byDate).sort((a,b)=>{
+    if(a==='No Date')return 1;
+    if(b==='No Date')return -1;
+    return b.localeCompare(a);
+  });
+
+  let html='';
+  sortedDates.forEach(date=>{
+    const topics=byDate[date];
+    const usedInDate=topics.filter(t=>isUsed(t)).length;
+    const pendingInDate=topics.length-usedInDate;
+    const isToday=date===sessionDate;
+    const displayDate=date==='No Date'?'No Date':
+      new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    html+=`<div style="
+      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+      padding:11px 16px;
+      background:${isToday?'var(--amber-l)':'var(--bg3)'};
+      border-top:2px solid ${isToday?'var(--amber-m)':'var(--bdr)'};
+      border-bottom:1px solid var(--bdr);
+      position:sticky;top:0;z-index:2;">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:.78rem;font-weight:800;color:${isToday?'var(--amber)':'var(--ink2)'};font-family:var(--fd)">
+          ${isToday?'📅':'📆'} ${displayDate}
+        </span>
+        ${isToday?'<span style="background:var(--amber);color:#fff;font-size:.5rem;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--fm)">TODAY</span>':''}
+      </div>
+      <div style="display:flex;gap:6px">
+        <span style="background:var(--sage-l);border:1px solid var(--sage-m);color:var(--sage);font-size:.58rem;font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--fm)">✅ ${usedInDate} used</span>
+        <span style="background:var(--coral-l);border:1px solid var(--coral-m);color:var(--coral);font-size:.58rem;font-weight:700;padding:3px 10px;border-radius:20px;font-family:var(--fm)">⏳ ${pendingInDate} pending</span>
+      </div>
+    </div>`;
+
+    topics.forEach(t=>{
+      const used=isUsed(t);
+      const date=String(t.topicDate||'').trim();
+      const no=String(t.topicNo||'').trim();
+      const logEntry=sessionLogs.find(l=>
+        String(l.topicNo||'').trim()===no &&
+        String(l.topicDate||'').trim()===date
+      );
+      html+=`<div style="
+        display:flex;align-items:center;gap:10px;
+        padding:10px 16px 10px 26px;
+        border-bottom:1px solid var(--bdr);
+        background:${used?'rgba(13,159,90,.03)':'var(--surf)'};
+        transition:background .15s;
+      " onmouseover="this.style.background='var(--bg3)'"
+         onmouseout="this.style.background='${used?'rgba(13,159,90,.03)':'var(--surf)'}'">
+        <div style="font-family:var(--fm);font-size:.63rem;color:var(--muted);width:32px;flex-shrink:0">#${t.topicNo}</div>
+        <div style="flex:1;font-size:.76rem;font-weight:${used?'600':'500'};color:${used?'var(--ink)':'var(--ink2)'}">
+          ${t.topicName||'—'}
+        </div>
+        ${used&&logEntry
+          ?`<div style="font-family:var(--fm);font-size:.6rem;color:var(--muted);flex-shrink:0;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👤 ${logEntry.name||logEntry.rollNo||''}</div>`
+          :'<div></div>'
+        }
+        <div class="${used?'thi-used':'thi-pend'}" style="flex-shrink:0">
+          ${used?'✅ Used':'⏳ Pending'}
+        </div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML=html;
+}
 </script>
 </body>
 </html>
